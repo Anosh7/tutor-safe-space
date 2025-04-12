@@ -17,8 +17,8 @@ import { toast } from "sonner";
 
 export default function StudentCourses() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [subjectFilter, setSubjectFilter] = useState<string>("");
-  const [gradeFilter, setGradeFilter] = useState<string>("");
+  const [subjectFilter, setSubjectFilter] = useState<string>("all-subjects");
+  const [gradeFilter, setGradeFilter] = useState<string>("all-grades");
   
   // Extract unique subjects and grades for filters
   const uniqueSubjects = Array.from(new Set(courses.flatMap(course => course.subjects)));
@@ -29,8 +29,8 @@ export default function StudentCourses() {
     const matchesSearch = course.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
                          course.description.toLowerCase().includes(searchTerm.toLowerCase());
     
-    const matchesSubject = subjectFilter === "" || course.subjects.some(s => s === subjectFilter);
-    const matchesGrade = gradeFilter === "" || course.grades.some(g => g === gradeFilter);
+    const matchesSubject = subjectFilter === "all-subjects" || course.subjects.some(s => s === subjectFilter);
+    const matchesGrade = gradeFilter === "all-grades" || course.grades.some(g => g === gradeFilter);
     
     return matchesSearch && matchesSubject && matchesGrade;
   });
@@ -68,7 +68,7 @@ export default function StudentCourses() {
                   </div>
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Subjects</SelectItem>
+                  <SelectItem value="all-subjects">All Subjects</SelectItem>
                   {uniqueSubjects.map((subject) => (
                     <SelectItem key={subject} value={subject}>{subject}</SelectItem>
                   ))}
@@ -83,7 +83,7 @@ export default function StudentCourses() {
                   </div>
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Grades</SelectItem>
+                  <SelectItem value="all-grades">All Grades</SelectItem>
                   {uniqueGrades.map((grade) => (
                     <SelectItem key={grade} value={grade}>Grade {grade}</SelectItem>
                   ))}
@@ -116,8 +116,8 @@ export default function StudentCourses() {
             <p className="text-lg text-gray-500">No courses match your search criteria</p>
             <Button variant="outline" onClick={() => {
               setSearchTerm("");
-              setSubjectFilter("");
-              setGradeFilter("");
+              setSubjectFilter("all-subjects");
+              setGradeFilter("all-grades");
             }} className="mt-4">
               Clear Filters
             </Button>
