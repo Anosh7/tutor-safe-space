@@ -5,12 +5,15 @@ import { Input } from "@/components/ui/input";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { students } from "@/data/mockData";
 import { useState } from "react";
-import { Search, Plus, Mail, Calendar } from "lucide-react";
+import { Search, Mail, Calendar, Eye } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 
 export default function TeacherStudents() {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
+  const { user } = useAuth();
   
   // Filter students by search term
   const filteredStudents = students.filter(student =>
@@ -18,14 +21,33 @@ export default function TeacherStudents() {
     student.subjects.join(", ").toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const handleAddNewStudent = () => {
+    if (user?.role === "admin") {
+      navigate("/admin-dashboard/add-student");
+    } else {
+      toast.error("Only administrators can add new students");
+    }
+  };
+
+  const handleScheduleSession = (studentId: string) => {
+    // Store the student ID in session storage for use on the create session page
+    sessionStorage.setItem("selectedStudentId", studentId);
+    navigate("/teacher-dashboard/sessions/create");
+  };
+
   return (
     <DashboardLayout>
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <h1 className="text-2xl md:text-3xl font-bold">Your Students</h1>
-          <Button className="bg-educational-purple hover:bg-educational-purple/90">
-            <Plus className="mr-2 h-4 w-4" /> Add New Student
-          </Button>
+          {user?.role === "admin" ? (
+            <Button 
+              className="bg-educational-purple hover:bg-educational-purple/90"
+              onClick={handleAddNewStudent}
+            >
+              Add New Student
+            </Button>
+          ) : null}
         </div>
         
         {/* Search and filter */}
@@ -63,7 +85,7 @@ export default function TeacherStudents() {
                       <Button 
                         size="sm" 
                         variant="outline"
-                        onClick={() => navigate(`/teacher-dashboard/sessions/create`)}
+                        onClick={() => handleScheduleSession(student.id)}
                       >
                         <Calendar className="mr-2 h-4 w-4" /> Schedule Session
                       </Button>
@@ -72,7 +94,7 @@ export default function TeacherStudents() {
                         className="bg-educational-purple hover:bg-educational-purple/90"
                         onClick={() => navigate(`/teacher-dashboard/students/${student.id}`)}
                       >
-                        View Profile
+                        <Eye className="mr-2 h-4 w-4" /> View Profile
                       </Button>
                     </div>
                   </div>

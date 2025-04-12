@@ -28,6 +28,8 @@ import TeacherSessions from "./pages/teacher/TeacherSessions";
 import TeacherHomework from "./pages/teacher/TeacherHomework";
 import TeacherEarnings from "./pages/teacher/TeacherEarnings";
 import TeacherTickets from "./pages/teacher/TeacherTickets";
+import CreateSession from "./pages/teacher/CreateSession";
+import StudentDetail from "./pages/teacher/StudentDetail";
 
 // Admin pages
 import AdminDashboard from "./pages/admin/AdminDashboard";
@@ -101,7 +103,7 @@ const App = () => (
             <Route 
               path="/teacher-dashboard" 
               element={
-                <ProtectedRoute allowedRoles={["teacher"]}>
+                <ProtectedRoute allowedRoles={["teacher", "admin"]}>
                   <TeacherDashboard />
                 </ProtectedRoute>
               } 
@@ -109,23 +111,39 @@ const App = () => (
             <Route 
               path="/teacher-dashboard/students" 
               element={
-                <ProtectedRoute allowedRoles={["teacher"]}>
+                <ProtectedRoute allowedRoles={["teacher", "admin"]}>
                   <TeacherStudents />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/teacher-dashboard/students/:id" 
+              element={
+                <ProtectedRoute allowedRoles={["teacher", "admin"]}>
+                  <StudentDetail />
                 </ProtectedRoute>
               } 
             />
             <Route 
               path="/teacher-dashboard/sessions" 
               element={
-                <ProtectedRoute allowedRoles={["teacher"]}>
+                <ProtectedRoute allowedRoles={["teacher", "admin"]}>
                   <TeacherSessions />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/teacher-dashboard/sessions/create" 
+              element={
+                <ProtectedRoute allowedRoles={["teacher", "admin"]}>
+                  <CreateSession />
                 </ProtectedRoute>
               } 
             />
             <Route 
               path="/teacher-dashboard/homework" 
               element={
-                <ProtectedRoute allowedRoles={["teacher"]}>
+                <ProtectedRoute allowedRoles={["teacher", "admin"]}>
                   <TeacherHomework />
                 </ProtectedRoute>
               } 
@@ -133,7 +151,7 @@ const App = () => (
             <Route 
               path="/teacher-dashboard/earnings" 
               element={
-                <ProtectedRoute allowedRoles={["teacher"]}>
+                <ProtectedRoute allowedRoles={["teacher", "admin"]}>
                   <TeacherEarnings />
                 </ProtectedRoute>
               } 
@@ -141,7 +159,7 @@ const App = () => (
             <Route 
               path="/teacher-dashboard/tickets" 
               element={
-                <ProtectedRoute allowedRoles={["teacher"]}>
+                <ProtectedRoute allowedRoles={["teacher", "admin"]}>
                   <TeacherTickets />
                 </ProtectedRoute>
               } 
