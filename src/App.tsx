@@ -23,6 +23,11 @@ import StudentTickets from "./pages/student/StudentTickets";
 
 // Teacher pages
 import TeacherDashboard from "./pages/teacher/TeacherDashboard";
+import TeacherStudents from "./pages/teacher/TeacherStudents";
+import TeacherSessions from "./pages/teacher/TeacherSessions";
+import TeacherHomework from "./pages/teacher/TeacherHomework";
+import TeacherEarnings from "./pages/teacher/TeacherEarnings";
+import TeacherTickets from "./pages/teacher/TeacherTickets";
 
 // Admin pages
 import AdminDashboard from "./pages/admin/AdminDashboard";
@@ -98,6 +103,46 @@ const App = () => (
               element={
                 <ProtectedRoute allowedRoles={["teacher"]}>
                   <TeacherDashboard />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/teacher-dashboard/students" 
+              element={
+                <ProtectedRoute allowedRoles={["teacher"]}>
+                  <TeacherStudents />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/teacher-dashboard/sessions" 
+              element={
+                <ProtectedRoute allowedRoles={["teacher"]}>
+                  <TeacherSessions />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/teacher-dashboard/homework" 
+              element={
+                <ProtectedRoute allowedRoles={["teacher"]}>
+                  <TeacherHomework />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/teacher-dashboard/earnings" 
+              element={
+                <ProtectedRoute allowedRoles={["teacher"]}>
+                  <TeacherEarnings />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/teacher-dashboard/tickets" 
+              element={
+                <ProtectedRoute allowedRoles={["teacher"]}>
+                  <TeacherTickets />
                 </ProtectedRoute>
               } 
             />
