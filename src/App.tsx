@@ -30,6 +30,7 @@ import TeacherEarnings from "./pages/teacher/TeacherEarnings";
 import TeacherTickets from "./pages/teacher/TeacherTickets";
 import CreateSession from "./pages/teacher/CreateSession";
 import StudentDetail from "./pages/teacher/StudentDetail";
+import CreateHomework from "./pages/teacher/CreateHomework";
 
 // Admin pages
 import AdminDashboard from "./pages/admin/AdminDashboard";
@@ -145,6 +146,14 @@ const App = () => (
               element={
                 <ProtectedRoute allowedRoles={["teacher", "admin"]}>
                   <TeacherHomework />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/teacher-dashboard/homework/create" 
+              element={
+                <ProtectedRoute allowedRoles={["teacher", "admin"]}>
+                  <CreateHomework />
                 </ProtectedRoute>
               } 
             />
