@@ -19,9 +19,11 @@ export default function StudentDetail() {
     .filter(session => session.studentId === id)
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   
-  // Filter homework for this specific student
+  // Filter homework for this specific student by finding the sessions first, 
+  // then collecting the corresponding homework assignments
+  const studentSessionIds = studentSessions.map(session => session.id);
   const studentHomework = homework
-    .filter(hw => hw.studentId === id)
+    .filter(hw => studentSessionIds.includes(hw.sessionId))
     .sort((a, b) => new Date(b.dueDate).getTime() - new Date(a.dueDate).getTime());
   
   const [activeTab, setActiveTab] = useState<'sessions' | 'homework'>('sessions');
