@@ -59,7 +59,7 @@ export const sessions = [
     title: "Calculus Introduction",
     date: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000), // 2 days from now
     durationMinutes: 60,
-    status: "scheduled",
+    status: "scheduled" as const,
     meetingLink: "https://teams.microsoft.com/meetinglink1",
     homeworkId: "homework1"
   },
@@ -71,7 +71,7 @@ export const sessions = [
     title: "Linear Algebra Basics",
     date: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000), // 3 days ago
     durationMinutes: 60,
-    status: "completed",
+    status: "completed" as const,
     meetingLink: "https://teams.microsoft.com/meetinglink2",
     homeworkId: "homework2",
     feedback: {
@@ -87,7 +87,7 @@ export const sessions = [
     title: "Mechanics: Force and Motion",
     date: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000), // 5 days from now
     durationMinutes: 60,
-    status: "scheduled",
+    status: "scheduled" as const,
     meetingLink: "https://teams.microsoft.com/meetinglink3"
   }
 ];

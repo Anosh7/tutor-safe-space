@@ -1,4 +1,3 @@
-
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -109,7 +108,7 @@ export default function TeacherDashboard() {
                   studentName="Alex Johnson"
                   date={session.date}
                   durationMinutes={session.durationMinutes}
-                  status={session.status}
+                  status={session.status as "scheduled" | "completed" | "cancelled"}
                   meetingLink={session.meetingLink}
                   userRole="teacher"
                 />
