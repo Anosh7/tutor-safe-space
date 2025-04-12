@@ -1,6 +1,5 @@
-
 import { ReactNode, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -27,6 +26,7 @@ interface DashboardLayoutProps {
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const handleLogout = () => {
@@ -71,6 +71,14 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   };
 
   const navigationLinks = getNavigationLinks();
+  
+  // Check if the current path matches or starts with the navigation item's path
+  const isActiveLink = (href: string) => {
+    if (href === '/student-dashboard' || href === '/teacher-dashboard' || href === '/admin-dashboard') {
+      return location.pathname === href;
+    }
+    return location.pathname.startsWith(href);
+  };
 
   return (
     <div className="h-screen flex overflow-hidden bg-gray-50">
@@ -117,7 +125,11 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                       e.preventDefault();
                       navigate(item.href);
                     }}
-                    className="group flex items-center px-2 py-2 text-sm font-medium rounded-md hover-effect hover:bg-gray-50 hover:text-educational-purple text-gray-600"
+                    className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md hover-effect ${
+                      isActiveLink(item.href)
+                        ? "bg-educational-purple bg-opacity-10 text-educational-purple"
+                        : "hover:bg-gray-50 hover:text-educational-purple text-gray-600"
+                    }`}
                   >
                     {item.icon}
                     {item.name}
@@ -212,7 +224,11 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                       navigate(item.href);
                       setMobileMenuOpen(false);
                     }}
-                    className="group flex items-center px-2 py-2 text-base font-medium rounded-md hover-effect hover:bg-gray-50 hover:text-educational-purple text-gray-600"
+                    className={`group flex items-center px-2 py-2 text-base font-medium rounded-md ${
+                      isActiveLink(item.href)
+                        ? "bg-educational-purple bg-opacity-10 text-educational-purple"
+                        : "hover:bg-gray-50 hover:text-educational-purple text-gray-600"
+                    }`}
                   >
                     {item.icon}
                     {item.name}
