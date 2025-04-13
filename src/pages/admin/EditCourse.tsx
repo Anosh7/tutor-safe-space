@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -90,20 +89,12 @@ export default function EditCourse() {
     e.preventDefault();
     
     if (selectedSubjects.length === 0) {
-      toast({
-        title: "Validation Error",
-        description: "Please select at least one subject",
-        variant: "destructive",
-      });
+      toast.error("Please select at least one subject");
       return;
     }
 
     if (selectedGrades.length === 0) {
-      toast({
-        title: "Validation Error",
-        description: "Please select at least one grade level",
-        variant: "destructive",
-      });
+      toast.error("Please select at least one grade level");
       return;
     }
     
