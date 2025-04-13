@@ -35,6 +35,15 @@ import HomeworkDetail from "./pages/teacher/HomeworkDetail";
 
 // Admin pages
 import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminUsers from "./pages/admin/AdminUsers";
+import AdminCourses from "./pages/admin/AdminCourses";
+import AdminSessions from "./pages/admin/AdminSessions";
+import AdminFinances from "./pages/admin/AdminFinances";
+import AdminTickets from "./pages/admin/AdminTickets";
+import AdminAnalytics from "./pages/admin/AdminAnalytics";
+import AdminSettings from "./pages/admin/AdminSettings";
+import CreateUser from "./pages/admin/CreateUser";
+import CreateCourse from "./pages/admin/CreateCourse";
 
 const queryClient = new QueryClient();
 
@@ -189,6 +198,78 @@ const App = () => (
               element={
                 <ProtectedRoute allowedRoles={["admin"]}>
                   <AdminDashboard />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/admin-dashboard/users" 
+              element={
+                <ProtectedRoute allowedRoles={["admin"]}>
+                  <AdminUsers />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/admin-dashboard/users/create" 
+              element={
+                <ProtectedRoute allowedRoles={["admin"]}>
+                  <CreateUser />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/admin-dashboard/courses" 
+              element={
+                <ProtectedRoute allowedRoles={["admin"]}>
+                  <AdminCourses />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/admin-dashboard/courses/create" 
+              element={
+                <ProtectedRoute allowedRoles={["admin"]}>
+                  <CreateCourse />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/admin-dashboard/sessions" 
+              element={
+                <ProtectedRoute allowedRoles={["admin"]}>
+                  <AdminSessions />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/admin-dashboard/finances" 
+              element={
+                <ProtectedRoute allowedRoles={["admin"]}>
+                  <AdminFinances />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/admin-dashboard/tickets" 
+              element={
+                <ProtectedRoute allowedRoles={["admin"]}>
+                  <AdminTickets />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/admin-dashboard/analytics" 
+              element={
+                <ProtectedRoute allowedRoles={["admin"]}>
+                  <AdminAnalytics />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/admin-dashboard/settings" 
+              element={
+                <ProtectedRoute allowedRoles={["admin"]}>
+                  <AdminSettings />
                 </ProtectedRoute>
               } 
             />
