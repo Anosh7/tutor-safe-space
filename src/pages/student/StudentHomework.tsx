@@ -19,18 +19,33 @@ import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 
+// Define a type for the homework to help TypeScript
+type HomeworkItem = {
+  id: string;
+  sessionId: string;
+  studentId: string;
+  title: string;
+  description: string;
+  assignedDate: Date;
+  dueDate: Date;
+  fileUrl: string;
+  status: string;
+  submissionDate?: Date;
+  submissionFileUrl?: string;
+};
+
 export default function StudentHomework() {
   const [activeTab, setActiveTab] = useState("pending");
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isUploading, setIsUploading] = useState(false);
-  const [homeworkData, setHomeworkData] = useState([...homework]);
+  const [homeworkData, setHomeworkData] = useState<HomeworkItem[]>([...homework as HomeworkItem[]]);
   const { user } = useAuth();
   
   // Effect to refresh homework data when the component mounts
   useEffect(() => {
     // In a real app, this would fetch from an API
     // For demo purposes, we're just using the imported homework data
-    setHomeworkData([...homework]);
+    setHomeworkData([...homework as HomeworkItem[]]);
   }, []);
   
   // Get sessions associated with the current student
@@ -54,7 +69,7 @@ export default function StudentHomework() {
   };
   
   // Simulate file upload
-  const handleFileUpload = (homeworkId) => {
+  const handleFileUpload = (homeworkId: string) => {
     setIsUploading(true);
     setUploadProgress(0);
     
@@ -67,17 +82,28 @@ export default function StudentHomework() {
           // Update homework status to submitted
           const updatedHomework = homeworkData.map(hw => 
             hw.id === homeworkId 
-              ? {...hw, status: "submitted", submissionDate: new Date()} 
+              ? {
+                  ...hw, 
+                  status: "submitted", 
+                  submissionDate: new Date(),
+                  submissionFileUrl: "/placeholder.svg" // Add this to fix the type error
+                } 
               : hw
           );
+          
           setHomeworkData(updatedHomework);
           
           // In a real app, we would send this to the API
           // For the demo, update the reference to the mock data
           const hwIndex = homework.findIndex(hw => hw.id === homeworkId);
           if (hwIndex !== -1) {
-            homework[hwIndex].status = "submitted";
-            homework[hwIndex].submissionDate = new Date();
+            const updatedHw = {
+              ...homework[hwIndex],
+              status: "submitted",
+              submissionDate: new Date(),
+              submissionFileUrl: "/placeholder.svg"
+            };
+            homework[hwIndex] = updatedHw;
           }
           
           toast.success("Homework submitted successfully!");

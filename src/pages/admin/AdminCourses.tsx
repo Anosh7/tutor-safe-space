@@ -12,10 +12,10 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { courses } from "@/data/mockData";
-import { PlusCircle, Search } from "lucide-react";
+import { PlusCircle, Search, Edit, Eye, Trash } from "lucide-react";
+import { toast } from "sonner";
 
 export default function AdminCourses() {
   const navigate = useNavigate();
@@ -26,6 +26,20 @@ export default function AdminCourses() {
     course.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
     course.subjects.some(subject => subject.toLowerCase().includes(searchQuery.toLowerCase()))
   );
+
+  const handleView = (courseId: string) => {
+    navigate(`/admin-dashboard/courses/${courseId}`);
+  };
+
+  const handleEdit = (courseId: string) => {
+    navigate(`/admin-dashboard/courses/edit/${courseId}`);
+  };
+
+  const handleDelete = (courseId: string) => {
+    // This would be an API call in a real application
+    toast.success("Course deleted successfully");
+    // In a real app, we would remove the course from the array
+  };
 
   return (
     <DashboardLayout>
@@ -78,11 +92,28 @@ export default function AdminCourses() {
                       <Button 
                         variant="ghost" 
                         size="sm" 
-                        onClick={() => navigate(`/admin-dashboard/courses/${course.id}`)}
+                        onClick={() => handleView(course.id)}
                       >
+                        <Eye className="h-4 w-4 mr-1" />
                         View
                       </Button>
-                      <Button variant="ghost" size="sm">Edit</Button>
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => handleEdit(course.id)}
+                      >
+                        <Edit className="h-4 w-4 mr-1" />
+                        Edit
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => handleDelete(course.id)}
+                        className="text-red-500 hover:text-red-600 hover:bg-red-50"
+                      >
+                        <Trash className="h-4 w-4 mr-1" />
+                        Delete
+                      </Button>
                     </TableCell>
                   </TableRow>
                 ))}
