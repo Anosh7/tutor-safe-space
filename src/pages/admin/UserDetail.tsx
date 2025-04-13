@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge"; // Add this import
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { students, teachers } from "@/data/mockData";
 import { ArrowLeft, Mail, Phone, MapPin, Clock, BookOpen, GraduationCap } from "lucide-react";
