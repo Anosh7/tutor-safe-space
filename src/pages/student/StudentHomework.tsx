@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { homework, sessions } from "@/data/mockData";
 import { 
@@ -17,15 +17,26 @@ import { Download, Upload, Clock, Calendar, Check, AlertCircle } from "lucide-re
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function StudentHomework() {
   const [activeTab, setActiveTab] = useState("pending");
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isUploading, setIsUploading] = useState(false);
+  const [homeworkData, setHomeworkData] = useState([...homework]);
+  const { user } = useAuth();
   
-  // Handle homework data
-  const pendingHomework = homework.filter(hw => hw.status === "assigned");
-  const submittedHomework = homework.filter(hw => hw.status === "submitted");
+  // Effect to refresh homework data when the component mounts
+  useEffect(() => {
+    // In a real app, this would fetch from an API
+    // For demo purposes, we're just using the imported homework data
+    setHomeworkData([...homework]);
+  }, []);
+  
+  // Handle homework data - filter for the current student
+  const studentId = user?.id || "student1"; // Fallback to student1 for demo
+  const pendingHomework = homeworkData.filter(hw => hw.status === "assigned" && hw.studentId === studentId);
+  const submittedHomework = homeworkData.filter(hw => hw.status === "submitted" && hw.studentId === studentId);
   
   // Function to get session title by homework's sessionId
   const getSessionTitle = (sessionId: string) => {
@@ -34,7 +45,7 @@ export default function StudentHomework() {
   };
   
   // Simulate file upload
-  const handleFileUpload = () => {
+  const handleFileUpload = (homeworkId) => {
     setIsUploading(true);
     setUploadProgress(0);
     
@@ -43,7 +54,25 @@ export default function StudentHomework() {
         if (prev >= 100) {
           clearInterval(interval);
           setIsUploading(false);
+          
+          // Update homework status to submitted
+          const updatedHomework = homeworkData.map(hw => 
+            hw.id === homeworkId 
+              ? {...hw, status: "submitted", submissionDate: new Date()} 
+              : hw
+          );
+          setHomeworkData(updatedHomework);
+          
+          // In a real app, we would send this to the API
+          // For the demo, update the reference to the mock data
+          const hwIndex = homework.findIndex(hw => hw.id === homeworkId);
+          if (hwIndex !== -1) {
+            homework[hwIndex].status = "submitted";
+            homework[hwIndex].submissionDate = new Date();
+          }
+          
           toast.success("Homework submitted successfully!");
+          setActiveTab("submitted");
           return 100;
         }
         return prev + 10;

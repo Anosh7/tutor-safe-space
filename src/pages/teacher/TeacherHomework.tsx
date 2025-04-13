@@ -7,16 +7,24 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Search, Plus, FileText, Check, Clock } from "lucide-react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { homework, students } from "@/data/mockData";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function TeacherHomework() {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
+  const [homeworkData, setHomeworkData] = useState([...homework]);
+  
+  // Effect to refresh homework data when the component mounts
+  useEffect(() => {
+    // In a real app, this would fetch from an API
+    // For demo purposes, we're just using the imported homework data
+    setHomeworkData([...homework]);
+  }, []);
   
   // Filter homework assignments
-  const assignedHomework = homework.filter(hw => hw.status === "assigned");
-  const submittedHomework = homework.filter(hw => hw.status === "submitted");
-  const completedHomework = homework.filter(hw => hw.status === "completed");
+  const assignedHomework = homeworkData.filter(hw => hw.status === "assigned");
+  const submittedHomework = homeworkData.filter(hw => hw.status === "submitted");
+  const completedHomework = homeworkData.filter(hw => hw.status === "completed");
   
   const filterHomeworkBySearch = (homeworkList) => {
     return homeworkList.filter(hw => 

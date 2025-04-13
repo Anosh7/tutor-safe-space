@@ -12,7 +12,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Textarea } from "@/components/ui/textarea";
-import { students, sessions } from "@/data/mockData";
+import { students, sessions, homework } from "@/data/mockData";
 
 const formSchema = z.object({
   title: z.string().min(3, { message: "Title must be at least 3 characters" }),
@@ -53,8 +53,38 @@ export default function CreateHomework() {
   });
 
   const onSubmit = (values: z.infer<typeof formSchema>) => {
+    // Get the session to determine the studentId
+    const session = sessions.find(s => s.id === values.sessionId);
+    if (!session) {
+      toast({
+        title: "Error",
+        description: "Selected session not found",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Create a new homework assignment
+    const newHomework = {
+      id: `homework${homework.length + 1}`,
+      sessionId: values.sessionId,
+      studentId: session.studentId, // Set the studentId from the session
+      title: values.title,
+      description: values.description,
+      assignedDate: new Date(),
+      dueDate: new Date(values.dueDate),
+      fileUrl: "",
+      status: "assigned",
+    };
+
     // In a real app, we would submit to an API
+    // For now, we'll just log and add to the mock data (in memory only)
     console.log("Form submitted:", values);
+    console.log("New homework created:", newHomework);
+    
+    // Add to homework array (this is in-memory only for the demo)
+    // In a real application, this would be an API call
+    homework.push(newHomework);
     
     // Show success toast
     toast({
