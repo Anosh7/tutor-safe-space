@@ -1,6 +1,6 @@
 
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -8,24 +8,57 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import DashboardLayout from "@/components/layout/DashboardLayout";
+import { students, teachers } from "@/data/mockData";
 import { toast } from "sonner";
 import { ArrowLeft, Save } from "lucide-react";
 
-export default function CreateUser() {
+export default function EditUser() {
   const navigate = useNavigate();
-  const [userRole, setUserRole] = useState("student");
+  const { id } = useParams();
+  const location = useLocation();
+  const initialRole = location.state?.userRole || "student";
+  
+  const [userRole, setUserRole] = useState(initialRole);
+  const [loading, setLoading] = useState(true);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     grade: "",
     subjects: [] as string[],
     board: "",
-    timezone: "America/New_York",
+    timezone: "",
     parentEmail: "",
     qualifications: "",
     experience: ""
   });
-  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    // In a real app, this would be an API call to get user data
+    const foundStudent = students.find(student => student.id === id);
+    const foundTeacher = teachers.find(teacher => teacher.id === id);
+    const foundUser = foundStudent || foundTeacher;
+    
+    // Add a slight delay to simulate API call
+    const timer = setTimeout(() => {
+      if (foundUser) {
+        setFormData({
+          name: foundUser.name,
+          email: foundUser.email,
+          grade: (foundStudent?.grade || "") as string,
+          subjects: foundUser.subjects,
+          board: (foundStudent?.board || "") as string,
+          timezone: foundUser.timezone,
+          parentEmail: (foundStudent?.parentEmail || "") as string,
+          qualifications: (foundTeacher?.qualifications || "") as string,
+          experience: (foundTeacher?.experience || "") as string
+        });
+        setUserRole(foundStudent ? "student" : "teacher");
+      }
+      setLoading(false);
+    }, 300);
+    
+    return () => clearTimeout(timer);
+  }, [id]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -38,15 +71,23 @@ export default function CreateUser() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
-    
-    // Simulate API call
-    setTimeout(() => {
-      toast.success(`New ${userRole} account has been created successfully.`);
-      setIsSubmitting(false);
-      navigate("/admin-dashboard/users");
-    }, 1000);
+    // In a real app, this would be an API call to update user data
+    toast.success("User updated successfully");
+    navigate("/admin-dashboard/users");
   };
+
+  if (loading) {
+    return (
+      <DashboardLayout>
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto"></div>
+            <p className="mt-2">Loading user data...</p>
+          </div>
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout>
@@ -61,14 +102,14 @@ export default function CreateUser() {
             <ArrowLeft className="h-4 w-4 mr-1" />
             Back
           </Button>
-          <h1 className="text-2xl md:text-3xl font-bold">Create New User</h1>
+          <h1 className="text-2xl md:text-3xl font-bold">Edit User</h1>
         </div>
 
         <Card>
           <CardHeader>
             <CardTitle>User Information</CardTitle>
             <CardDescription>
-              Enter the details for the new user account
+              Update the user's details
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -77,10 +118,9 @@ export default function CreateUser() {
                 <div className="space-y-2">
                   <Label>User Role</Label>
                   <RadioGroup 
-                    defaultValue="student" 
                     value={userRole} 
                     onValueChange={setUserRole}
-                    className="flex flex-wrap gap-4"
+                    className="flex space-x-4"
                   >
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="student" id="student" />
@@ -106,7 +146,6 @@ export default function CreateUser() {
                       required 
                       value={formData.name} 
                       onChange={handleInputChange} 
-                      placeholder="Enter full name"
                     />
                   </div>
                   
@@ -119,7 +158,6 @@ export default function CreateUser() {
                       required 
                       value={formData.email} 
                       onChange={handleInputChange} 
-                      placeholder="Enter email address"
                     />
                   </div>
                 </div>
@@ -192,7 +230,6 @@ export default function CreateUser() {
                         type="email"
                         value={formData.parentEmail}
                         onChange={handleInputChange}
-                        placeholder="Enter parent's email"
                       />
                     </div>
                   </>
@@ -230,22 +267,12 @@ export default function CreateUser() {
                   type="button" 
                   variant="outline"
                   onClick={() => navigate("/admin-dashboard/users")}
-                  disabled={isSubmitting}
                 >
                   Cancel
                 </Button>
-                <Button type="submit" disabled={isSubmitting}>
-                  {isSubmitting ? (
-                    <>
-                      <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"></div>
-                      Creating...
-                    </>
-                  ) : (
-                    <>
-                      <Save className="mr-2 h-4 w-4" />
-                      Create User
-                    </>
-                  )}
+                <Button type="submit">
+                  <Save className="mr-2 h-4 w-4" />
+                  Save Changes
                 </Button>
               </div>
             </form>

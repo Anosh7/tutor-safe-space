@@ -44,6 +44,8 @@ import AdminAnalytics from "./pages/admin/AdminAnalytics";
 import AdminSettings from "./pages/admin/AdminSettings";
 import CreateUser from "./pages/admin/CreateUser";
 import CreateCourse from "./pages/admin/CreateCourse";
+import UserDetail from "./pages/admin/UserDetail";
+import EditUser from "./pages/admin/EditUser";
 
 const queryClient = new QueryClient();
 
@@ -214,6 +216,22 @@ const App = () => (
               element={
                 <ProtectedRoute allowedRoles={["admin"]}>
                   <CreateUser />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/admin-dashboard/users/:id" 
+              element={
+                <ProtectedRoute allowedRoles={["admin"]}>
+                  <UserDetail />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/admin-dashboard/users/edit/:id" 
+              element={
+                <ProtectedRoute allowedRoles={["admin"]}>
+                  <EditUser />
                 </ProtectedRoute>
               } 
             />
