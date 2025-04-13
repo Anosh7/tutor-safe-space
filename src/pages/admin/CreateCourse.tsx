@@ -8,8 +8,9 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import DashboardLayout from "@/components/layout/DashboardLayout";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { ArrowLeft, Save, UploadCloud } from "lucide-react";
+import { courses } from "@/data/mockData";
 
 // Subject options
 const subjectOptions = [
@@ -23,17 +24,18 @@ const subjectOptions = [
 
 // Grade options
 const gradeOptions = [
-  { id: "grade-8", label: "Grade 8" },
-  { id: "grade-9", label: "Grade 9" },
-  { id: "grade-10", label: "Grade 10" },
-  { id: "grade-11", label: "Grade 11" },
-  { id: "grade-12", label: "Grade 12" },
+  { id: "8", label: "Grade 8" },
+  { id: "9", label: "Grade 9" },
+  { id: "10", label: "Grade 10" },
+  { id: "11", label: "Grade 11" },
+  { id: "12", label: "Grade 12" },
 ];
 
 export default function CreateCourse() {
   const navigate = useNavigate();
   const [selectedSubjects, setSelectedSubjects] = useState<string[]>([]);
   const [selectedGrades, setSelectedGrades] = useState<string[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   const [formData, setFormData] = useState({
     title: "",
@@ -65,30 +67,40 @@ export default function CreateCourse() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmitting(true);
     
     if (selectedSubjects.length === 0) {
-      toast({
-        title: "Validation Error",
-        description: "Please select at least one subject",
-        variant: "destructive",
-      });
+      toast.error("Please select at least one subject");
+      setIsSubmitting(false);
       return;
     }
 
     if (selectedGrades.length === 0) {
-      toast({
-        title: "Validation Error",
-        description: "Please select at least one grade level",
-        variant: "destructive",
-      });
+      toast.error("Please select at least one grade level");
+      setIsSubmitting(false);
       return;
     }
     
-    toast({
-      title: "Course Created",
-      description: "New course has been created successfully.",
-    });
-    navigate("/admin-dashboard/courses");
+    // Generate a new course object
+    const newCourse = {
+      id: `course-${courses.length + 1}`,
+      title: formData.title,
+      description: formData.description,
+      price: parseFloat(formData.price) || 0,
+      duration: formData.duration,
+      subjects: selectedSubjects,
+      grades: selectedGrades,
+      enrollments: 0,
+      rating: 0,
+      imageUrl: "/placeholder.svg"
+    };
+    
+    // Simulate API call
+    setTimeout(() => {
+      toast.success("New course has been created successfully");
+      setIsSubmitting(false);
+      navigate("/admin-dashboard/courses");
+    }, 1000);
   };
 
   return (
@@ -236,12 +248,22 @@ export default function CreateCourse() {
               type="button" 
               variant="outline"
               onClick={() => navigate("/admin-dashboard/courses")}
+              disabled={isSubmitting}
             >
               Cancel
             </Button>
-            <Button type="submit">
-              <Save className="mr-2 h-4 w-4" />
-              Create Course
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? (
+                <>
+                  <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"></div>
+                  Creating...
+                </>
+              ) : (
+                <>
+                  <Save className="mr-2 h-4 w-4" />
+                  Create Course
+                </>
+              )}
             </Button>
           </div>
         </form>
