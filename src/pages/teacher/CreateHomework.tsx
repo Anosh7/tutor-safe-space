@@ -39,7 +39,7 @@ export default function CreateHomework() {
   // Get student sessions for dropdown
   const studentSessions = sessions
     .filter(session => !selectedStudentId || session.studentId === selectedStudentId)
-    .filter(session => session.status !== "cancelled")
+    .filter(session => session.status === "scheduled" || session.status === "completed")
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   
   const form = useForm<z.infer<typeof formSchema>>({
