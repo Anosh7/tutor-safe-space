@@ -33,10 +33,19 @@ export default function StudentHomework() {
     setHomeworkData([...homework]);
   }, []);
   
-  // Handle homework data - filter for the current student
+  // Get sessions associated with the current student
   const studentId = user?.id || "student1"; // Fallback to student1 for demo
-  const pendingHomework = homeworkData.filter(hw => hw.status === "assigned" && hw.studentId === studentId);
-  const submittedHomework = homeworkData.filter(hw => hw.status === "submitted" && hw.studentId === studentId);
+  const studentSessions = sessions.filter(session => session.studentId === studentId);
+  const studentSessionIds = studentSessions.map(session => session.id);
+  
+  // Filter homework for this student by matching sessionIds
+  const pendingHomework = homeworkData.filter(hw => {
+    return hw.status === "assigned" && studentSessionIds.includes(hw.sessionId);
+  });
+  
+  const submittedHomework = homeworkData.filter(hw => {
+    return hw.status === "submitted" && studentSessionIds.includes(hw.sessionId);
+  });
   
   // Function to get session title by homework's sessionId
   const getSessionTitle = (sessionId: string) => {
@@ -169,7 +178,7 @@ export default function StudentHomework() {
                             <Button variant="outline" onClick={() => setIsUploading(false)} disabled={isUploading}>
                               Cancel
                             </Button>
-                            <Button onClick={handleFileUpload} disabled={isUploading}>
+                            <Button onClick={() => handleFileUpload(hw.id)} disabled={isUploading}>
                               {isUploading ? "Uploading..." : "Upload"}
                             </Button>
                           </DialogFooter>

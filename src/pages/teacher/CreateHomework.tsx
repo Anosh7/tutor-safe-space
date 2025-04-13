@@ -68,22 +68,21 @@ export default function CreateHomework() {
     const newHomework = {
       id: `homework${homework.length + 1}`,
       sessionId: values.sessionId,
-      studentId: session.studentId, // Set the studentId from the session
+      studentId: session.studentId, // Set the studentId based on the session
       title: values.title,
       description: values.description,
       assignedDate: new Date(),
       dueDate: new Date(values.dueDate),
-      fileUrl: "",
+      fileUrl: "/placeholder.svg",
       status: "assigned",
     };
 
     // In a real app, we would submit to an API
-    // For now, we'll just log and add to the mock data (in memory only)
+    // For now, we'll just log and add to the mock data
     console.log("Form submitted:", values);
     console.log("New homework created:", newHomework);
     
     // Add to homework array (this is in-memory only for the demo)
-    // In a real application, this would be an API call
     homework.push(newHomework);
     
     // Show success toast

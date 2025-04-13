@@ -97,6 +97,7 @@ export const homework = [
   {
     id: "homework1",
     sessionId: "session1",
+    studentId: "student1", // Added studentId field
     title: "Calculus Practice Problems",
     description: "Complete problems 1-20 from Chapter 3",
     assignedDate: new Date(Date.now()),
@@ -107,6 +108,7 @@ export const homework = [
   {
     id: "homework2",
     sessionId: "session2",
+    studentId: "student1", // Added studentId field
     title: "Linear Algebra Worksheet",
     description: "Solve matrix operations and vector space problems",
     assignedDate: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), // Assigned 7 days ago

@@ -31,6 +31,7 @@ import TeacherTickets from "./pages/teacher/TeacherTickets";
 import CreateSession from "./pages/teacher/CreateSession";
 import StudentDetail from "./pages/teacher/StudentDetail";
 import CreateHomework from "./pages/teacher/CreateHomework";
+import HomeworkDetail from "./pages/teacher/HomeworkDetail";
 
 // Admin pages
 import AdminDashboard from "./pages/admin/AdminDashboard";
@@ -154,6 +155,14 @@ const App = () => (
               element={
                 <ProtectedRoute allowedRoles={["teacher", "admin"]}>
                   <CreateHomework />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/teacher-dashboard/homework/:id" 
+              element={
+                <ProtectedRoute allowedRoles={["teacher", "admin"]}>
+                  <HomeworkDetail />
                 </ProtectedRoute>
               } 
             />
