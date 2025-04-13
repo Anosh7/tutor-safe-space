@@ -46,6 +46,8 @@ import CreateUser from "./pages/admin/CreateUser";
 import CreateCourse from "./pages/admin/CreateCourse";
 import UserDetail from "./pages/admin/UserDetail";
 import EditUser from "./pages/admin/EditUser";
+import CourseDetail from "./pages/admin/CourseDetail";
+import EditCourse from "./pages/admin/EditCourse";
 
 const queryClient = new QueryClient();
 
@@ -248,6 +250,22 @@ const App = () => (
               element={
                 <ProtectedRoute allowedRoles={["admin"]}>
                   <CreateCourse />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/admin-dashboard/courses/:id" 
+              element={
+                <ProtectedRoute allowedRoles={["admin"]}>
+                  <CourseDetail />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/admin-dashboard/courses/edit/:id" 
+              element={
+                <ProtectedRoute allowedRoles={["admin"]}>
+                  <EditCourse />
                 </ProtectedRoute>
               } 
             />

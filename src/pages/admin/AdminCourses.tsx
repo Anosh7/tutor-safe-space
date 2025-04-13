@@ -13,13 +13,25 @@ import {
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import DashboardLayout from "@/components/layout/DashboardLayout";
-import { courses } from "@/data/mockData";
+import { courses as initialCourses } from "@/data/mockData";
 import { PlusCircle, Search, Edit, Eye, Trash } from "lucide-react";
 import { toast } from "sonner";
+import { 
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export default function AdminCourses() {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
+  const [courses, setCourses] = useState(initialCourses);
+  const [courseToDelete, setCourseToDelete] = useState<string | null>(null);
   
   const filteredCourses = courses.filter(course => 
     course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -35,10 +47,23 @@ export default function AdminCourses() {
     navigate(`/admin-dashboard/courses/edit/${courseId}`);
   };
 
-  const handleDelete = (courseId: string) => {
-    // This would be an API call in a real application
+  const confirmDelete = (courseId: string) => {
+    setCourseToDelete(courseId);
+  };
+
+  const handleDelete = () => {
+    if (!courseToDelete) return;
+    
+    // Filter out the course to be deleted
+    const updatedCourses = courses.filter(course => course.id !== courseToDelete);
+    setCourses(updatedCourses);
+    
     toast.success("Course deleted successfully");
-    // In a real app, we would remove the course from the array
+    setCourseToDelete(null);
+  };
+
+  const cancelDelete = () => {
+    setCourseToDelete(null);
   };
 
   return (
@@ -71,57 +96,85 @@ export default function AdminCourses() {
             </div>
           </CardHeader>
           <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Title</TableHead>
-                  <TableHead>Subjects</TableHead>
-                  <TableHead>Price</TableHead>
-                  <TableHead>Enrolled</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredCourses.map((course) => (
-                  <TableRow key={course.id}>
-                    <TableCell className="font-medium">{course.title}</TableCell>
-                    <TableCell>{course.subjects.join(", ")}</TableCell>
-                    <TableCell>${course.price}</TableCell>
-                    <TableCell>{course.enrolledCount}</TableCell>
-                    <TableCell className="text-right">
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        onClick={() => handleView(course.id)}
-                      >
-                        <Eye className="h-4 w-4 mr-1" />
-                        View
-                      </Button>
-                      <Button 
-                        variant="ghost" 
-                        size="sm"
-                        onClick={() => handleEdit(course.id)}
-                      >
-                        <Edit className="h-4 w-4 mr-1" />
-                        Edit
-                      </Button>
-                      <Button 
-                        variant="ghost" 
-                        size="sm"
-                        onClick={() => handleDelete(course.id)}
-                        className="text-red-500 hover:text-red-600 hover:bg-red-50"
-                      >
-                        <Trash className="h-4 w-4 mr-1" />
-                        Delete
-                      </Button>
-                    </TableCell>
+            {courses.length === 0 ? (
+              <div className="text-center py-8 text-gray-500">
+                No courses found. Click "Create Course" to add a new course.
+              </div>
+            ) : filteredCourses.length === 0 ? (
+              <div className="text-center py-8 text-gray-500">
+                No courses match your search query.
+              </div>
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Title</TableHead>
+                    <TableHead>Subjects</TableHead>
+                    <TableHead>Price</TableHead>
+                    <TableHead>Enrolled</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {filteredCourses.map((course) => (
+                    <TableRow key={course.id}>
+                      <TableCell className="font-medium">{course.title}</TableCell>
+                      <TableCell>{course.subjects.join(", ")}</TableCell>
+                      <TableCell>${course.price}</TableCell>
+                      <TableCell>{course.enrolledCount}</TableCell>
+                      <TableCell className="text-right">
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          onClick={() => handleView(course.id)}
+                        >
+                          <Eye className="h-4 w-4 mr-1" />
+                          View
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => handleEdit(course.id)}
+                        >
+                          <Edit className="h-4 w-4 mr-1" />
+                          Edit
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => confirmDelete(course.id)}
+                          className="text-red-500 hover:text-red-600 hover:bg-red-50"
+                        >
+                          <Trash className="h-4 w-4 mr-1" />
+                          Delete
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
           </CardContent>
         </Card>
       </div>
+
+      <AlertDialog open={!!courseToDelete} onOpenChange={() => setCourseToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the course
+              and remove its data from our servers.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={cancelDelete}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} className="bg-red-500 hover:bg-red-600">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </DashboardLayout>
   );
 }
