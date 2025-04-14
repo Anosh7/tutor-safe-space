@@ -31,10 +31,10 @@ export default function Navbar() {
           <div className="flex-shrink-0 flex items-center">
             <Link to="/" className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-full bg-educational-purple flex items-center justify-center">
-                <span className="text-white font-bold text-sm">TS</span>
+                <span className="text-white font-bold text-sm">SA</span>
               </div>
               <span className="text-xl font-montserrat font-bold text-educational-purple">
-                TutorSafeSpace
+                Shrija Academy
               </span>
             </Link>
           </div>
