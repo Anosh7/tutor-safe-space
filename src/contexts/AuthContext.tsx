@@ -67,25 +67,34 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     
     // If not found, check dynamically created students
     if (!foundUser) {
-      foundUser = students.find(
+      const studentUser = students.find(
         s => s.email === email && s.password === password
       );
+      
+      if (studentUser) {
+        // The student already has the role property now
+        const { password: _, ...userWithoutPassword } = studentUser;
+        foundUser = userWithoutPassword;
+      }
     }
     
     // If not found, check dynamically created teachers
     if (!foundUser) {
-      foundUser = teachers.find(
+      const teacherUser = teachers.find(
         t => t.email === email && t.password === password
       );
+      
+      if (teacherUser) {
+        // The teacher already has the role property now
+        const { password: _, ...userWithoutPassword } = teacherUser;
+        foundUser = userWithoutPassword;
+      }
     }
     
     if (foundUser) {
-      // Create a user object without the password
-      const { password: _, ...userWithoutPassword } = foundUser;
-      
-      setUser(userWithoutPassword);
-      localStorage.setItem("eduUser", JSON.stringify(userWithoutPassword));
-      toast.success(`Welcome back, ${userWithoutPassword.name}!`);
+      setUser(foundUser as User);
+      localStorage.setItem("eduUser", JSON.stringify(foundUser));
+      toast.success(`Welcome back, ${foundUser.name}!`);
     } else {
       toast.error("Invalid email or password");
       throw new Error("Invalid credentials");

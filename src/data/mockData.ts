@@ -188,6 +188,7 @@ export interface Student {
   assignedTeacher?: string;
   password?: string;
   enrolledCourses?: string[];
+  role: "student"; // Add the role property with fixed value "student"
 }
 
 export const students: Student[] = [
@@ -203,7 +204,8 @@ export const students: Student[] = [
     profileImage: "/placeholder.svg",
     password: "password123",
     assignedTeacher: "teacher1",
-    enrolledCourses: ["course1", "course2"]
+    enrolledCourses: ["course1", "course2"],
+    role: "student" // Add role here
   }
 ];
 
@@ -220,6 +222,7 @@ export interface Teacher {
   password?: string;
   assignedCourses?: string[];
   assignedStudents?: string[];
+  role: "teacher"; // Add the role property with fixed value "teacher"
 }
 
 export const teachers: Teacher[] = [
@@ -234,7 +237,8 @@ export const teachers: Teacher[] = [
     profileImage: "/placeholder.svg",
     password: "password123",
     assignedCourses: ["course1", "course2", "course3"],
-    assignedStudents: ["student1"]
+    assignedStudents: ["student1"],
+    role: "teacher" // Add role here
   }
 ];
 
