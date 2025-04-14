@@ -206,7 +206,7 @@ export default function CreateUser() {
                     <RadioGroup 
                       defaultValue="student" 
                       value={userRole} 
-                      onValueChange={setUserRole}
+                      onValueChange={(value) => setUserRole(value as UserRole)}
                       className="flex flex-wrap gap-4"
                     >
                       <div className="flex items-center space-x-2">

@@ -13,6 +13,7 @@ export interface User {
   email: string;
   role: UserRole;
   profileImage?: string;
+  password?: string; // Make password optional in the User interface
 }
 
 interface AuthContextType {
@@ -72,15 +73,14 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       );
       
       if (studentUser) {
-        // Create a user object without the password for storage
-        const { password: _, ...userWithoutPassword } = studentUser;
-        // For the User type, we don't need the password
+        // For the User type with password included initially
         foundUser = {
           id: studentUser.id,
           name: studentUser.name,
           email: studentUser.email,
           role: studentUser.role,
-          profileImage: studentUser.profileImage
+          profileImage: studentUser.profileImage,
+          password: studentUser.password // Include password initially
         };
       }
     }
@@ -92,31 +92,24 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       );
       
       if (teacherUser) {
-        // Create a user object without the password for storage
-        const { password: _, ...userWithoutPassword } = teacherUser;
-        // For the User type, we don't need the password
+        // For the User type with password included initially
         foundUser = {
           id: teacherUser.id,
           name: teacherUser.name,
           email: teacherUser.email,
           role: teacherUser.role,
-          profileImage: teacherUser.profileImage
+          profileImage: teacherUser.profileImage,
+          password: teacherUser.password // Include password initially
         };
       }
     }
     
-    if (foundUser) {
-      // Remove password from admin user before storing
-      if ('password' in foundUser) {
-        const { password: _, ...userWithoutPassword } = foundUser;
-        setUser(userWithoutPassword as User);
-        localStorage.setItem("eduUser", JSON.stringify(userWithoutPassword));
-        toast.success(`Welcome back, ${userWithoutPassword.name}!`);
-      } else {
-        setUser(foundUser as User);
-        localStorage.setItem("eduUser", JSON.stringify(foundUser));
-        toast.success(`Welcome back, ${foundUser.name}!`);
-      }
+    if (foundUser && foundUser.name) { // Add null check for foundUser.name
+      // Remove password before storing
+      const { password: _, ...userWithoutPassword } = foundUser;
+      setUser(userWithoutPassword);
+      localStorage.setItem("eduUser", JSON.stringify(userWithoutPassword));
+      toast.success(`Welcome back, ${foundUser.name}!`);
     } else {
       toast.error("Invalid email or password");
       throw new Error("Invalid credentials");
