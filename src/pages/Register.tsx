@@ -8,18 +8,20 @@ import { AlertCircle } from "lucide-react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import MainLayout from "@/components/layout/MainLayout";
-import { toast } from "sonner";
+import { useAuth } from "@/contexts/AuthContext";
+import { UserRole } from "@/contexts/AuthContext";
 
 export default function Register() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [role, setRole] = useState<"student" | "teacher">("student");
+  const [role, setRole] = useState<UserRole>("student");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   
   const navigate = useNavigate();
+  const { signup } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,19 +33,21 @@ export default function Register() {
       return;
     }
     
-    if (password.length < 8) {
-      setError("Password must be at least 8 characters long");
+    if (password.length < 6) {
+      setError("Password must be at least 6 characters long");
       return;
     }
     
     setIsLoading(true);
     
-    // Simulate API request
-    setTimeout(() => {
-      setIsLoading(false);
-      toast.success("Account created successfully! Please log in.");
+    try {
+      await signup(email, password, name, role);
       navigate("/login");
-    }, 1500);
+    } catch (err: any) {
+      setError(err.message || "Failed to create account");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -114,7 +118,7 @@ export default function Register() {
                 <Label>I am a</Label>
                 <RadioGroup 
                   value={role} 
-                  onValueChange={(value) => setRole(value as "student" | "teacher")}
+                  onValueChange={(value) => setRole(value as UserRole)}
                   className="flex space-x-4"
                 >
                   <div className="flex items-center space-x-2">

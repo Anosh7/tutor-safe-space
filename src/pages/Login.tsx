@@ -26,11 +26,11 @@ export default function Login() {
     try {
       await login(email, password);
       
-      // After successful login, determine where to redirect based on user role
-      // This is handled by the AuthContext login function
+      // After successful login, navigate to homepage
       navigate("/");
-    } catch (err) {
-      setError("Invalid email or password");
+    } catch (err: any) {
+      setError(err.message || "Invalid email or password");
+    } finally {
       setIsLoading(false);
     }
   };
@@ -103,15 +103,6 @@ export default function Login() {
                 >
                   Sign up
                 </Link>
-              </div>
-              
-              <div className="text-xs text-center text-gray-500">
-                For demo purposes, use:
-                <div className="mt-2">
-                  <div><strong>Student:</strong> student@example.com / password123</div>
-                  <div><strong>Teacher:</strong> teacher@example.com / password123</div>
-                  <div><strong>Admin:</strong> admin@example.com / password123</div>
-                </div>
               </div>
             </CardFooter>
           </form>
