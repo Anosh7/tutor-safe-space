@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -10,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { toast } from "sonner";
 import { ArrowLeft, Save, Copy } from "lucide-react";
+import { teachers, students } from "@/data/mockData";
 
 export default function CreateUser() {
   const navigate = useNavigate();
@@ -29,9 +29,12 @@ export default function CreateUser() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [createdUser, setCreatedUser] = useState<null | {
+    id: string;
     username: string;
     password: string;
     role: string;
+    name: string;
+    email: string;
   }>(null);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -73,20 +76,52 @@ export default function CreateUser() {
     const username = formData.username || generateUsername(formData.name);
     const password = formData.password || generatePassword();
     
-    // Simulate API call
-    setTimeout(() => {
-      setCreatedUser({
-        username,
-        password,
-        role: userRole
-      });
+    // Generate a unique ID
+    const newId = `${userRole}${Math.floor(Math.random() * 1000)}`;
+    
+    // Create a new user object
+    const newUser = {
+      id: newId,
+      name: formData.name,
+      email: formData.email,
+      username,
+      password,
+      role: userRole,
+    };
+    
+    // Add additional fields based on user role
+    if (userRole === "student") {
+      const newStudent = {
+        ...newUser,
+        board: formData.board,
+        grade: formData.grade,
+        subjects: formData.subjects.length > 0 ? formData.subjects : ["Mathematics"], // Default subject
+        timezone: formData.timezone,
+        parentEmail: formData.parentEmail,
+        profileImage: "/placeholder.svg"
+      };
       
-      toast.success(`New ${userRole} account has been created successfully.`);
-      setIsSubmitting(false);
+      // Add to students array
+      students.push(newStudent);
+    } else if (userRole === "teacher") {
+      const newTeacher = {
+        ...newUser,
+        subjects: formData.subjects.length > 0 ? formData.subjects : ["Mathematics"], // Default subject
+        qualifications: formData.qualifications || "Not specified",
+        experience: formData.experience || "Not specified",
+        timezone: formData.timezone,
+        profileImage: "/placeholder.svg"
+      };
       
-      // Don't navigate away immediately so user can see credentials
-      // We'll let them manually navigate after viewing the credentials
-    }, 1000);
+      // Add to teachers array
+      teachers.push(newTeacher);
+    }
+    
+    // Store created user for display
+    setCreatedUser(newUser);
+    
+    toast.success(`New ${userRole} account has been created successfully.`);
+    setIsSubmitting(false);
   };
 
   return (

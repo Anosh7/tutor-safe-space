@@ -156,7 +156,22 @@ export const billing = [
 ];
 
 // Student Data
-export const students = [
+export interface Student {
+  id: string;
+  name: string;
+  email: string;
+  board: string;
+  grade: string;
+  subjects: string[];
+  timezone: string;
+  parentEmail: string;
+  profileImage: string;
+  assignedTeacher?: string;
+  username?: string;
+  password?: string;
+}
+
+export const students: Student[] = [
   {
     id: "student1",
     name: "Alex Johnson",
@@ -166,12 +181,28 @@ export const students = [
     subjects: ["Mathematics", "Physics"],
     timezone: "Asia/Kolkata",
     parentEmail: "parent@example.com",
-    profileImage: "/placeholder.svg"
+    profileImage: "/placeholder.svg",
+    username: "alexj1234",
+    password: "password123",
+    assignedTeacher: "teacher1"
   }
 ];
 
 // Teacher Data
-export const teachers = [
+export interface Teacher {
+  id: string;
+  name: string;
+  email: string;
+  subjects: string[];
+  qualifications: string;
+  experience: string;
+  timezone: string;
+  profileImage: string;
+  username?: string;
+  password?: string;
+}
+
+export const teachers: Teacher[] = [
   {
     id: "teacher1",
     name: "Prof. Sarah Miller",
@@ -180,7 +211,9 @@ export const teachers = [
     qualifications: "PhD in Mathematics",
     experience: "10 years",
     timezone: "America/New_York",
-    profileImage: "/placeholder.svg"
+    profileImage: "/placeholder.svg",
+    username: "sarahm1234",
+    password: "password123"
   }
 ];
 

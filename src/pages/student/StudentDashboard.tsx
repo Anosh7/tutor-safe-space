@@ -1,11 +1,12 @@
+
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { useAuth } from "@/contexts/AuthContext";
-import { sessions, homework, billing } from "@/data/mockData";
+import { sessions, homework, billing, teachers } from "@/data/mockData";
 import SessionCard from "@/components/shared/SessionCard";
-import { Calendar, FileText, CreditCard, BookOpen } from "lucide-react";
+import { Calendar, FileText, CreditCard, BookOpen, User } from "lucide-react";
 
 export default function StudentDashboard() {
   const { user } = useAuth();
@@ -23,11 +24,42 @@ export default function StudentDashboard() {
     
   const pendingBills = billing
     .filter(bill => bill.status === "pending");
+    
+  // Find assigned teacher for this student
+  const studentId = "student1"; // In a real app, this would be the current user's ID
+  const assignedTeacherId = "teacher1"; // This would come from the student's data
+  const assignedTeacher = teachers.find(teacher => teacher.id === assignedTeacherId);
 
   return (
     <DashboardLayout>
       <div className="space-y-6">
         <h1 className="text-2xl md:text-3xl font-bold">Welcome, {user?.name}</h1>
+        
+        {/* Assigned Teacher */}
+        {assignedTeacher && (
+          <Card className="bg-educational-purple/5 border-educational-purple/20">
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-4">
+                <div className="h-12 w-12 rounded-full bg-educational-purple/20 flex items-center justify-center">
+                  <User className="h-6 w-6 text-educational-purple" />
+                </div>
+                <div>
+                  <h3 className="font-medium text-lg">Your Teacher</h3>
+                  <p className="text-sm">{assignedTeacher.name} • {assignedTeacher.subjects.join(", ")}</p>
+                </div>
+                <div className="ml-auto">
+                  <Button 
+                    variant="outline" 
+                    className="border-educational-purple text-educational-purple hover:bg-educational-purple/10"
+                    onClick={() => navigate("/student-dashboard/teachers")}
+                  >
+                    View Profile
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
         
         {/* Stats Overview */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">

@@ -3,20 +3,39 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import DashboardLayout from "@/components/layout/DashboardLayout";
-import { students } from "@/data/mockData";
+import { students, teachers } from "@/data/mockData";
 import { useState } from "react";
-import { Search, Mail, Calendar, Eye } from "lucide-react";
+import { Search, Mail, Calendar, Eye, Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 
 export default function TeacherStudents() {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const { user } = useAuth();
+  const [availableStudents, setAvailableStudents] = useState([...students]);
+  const [selectedStudent, setSelectedStudent] = useState("");
+  const [dialogOpen, setDialogOpen] = useState(false);
+  
+  // Get current teacher's assigned students
+  const teacherStudents = user?.role === "teacher" 
+    ? students.filter(student => student.assignedTeacher === user.id)
+    : students;
   
   // Filter students by search term
-  const filteredStudents = students.filter(student =>
+  const filteredStudents = teacherStudents.filter(student =>
     student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     student.subjects.join(", ").toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -25,7 +44,35 @@ export default function TeacherStudents() {
     if (user?.role === "admin") {
       navigate("/admin-dashboard/add-student");
     } else {
-      toast.error("Only administrators can add new students");
+      setDialogOpen(true);
+    }
+  };
+
+  const handleAssignStudent = () => {
+    if (!selectedStudent || !user?.id) {
+      toast.error("Please select a student to assign");
+      return;
+    }
+
+    // Find the student and assign the current teacher
+    const studentToAssign = availableStudents.find(s => s.id === selectedStudent);
+    
+    if (studentToAssign) {
+      // Update the student with the teacher ID
+      const studentIndex = students.findIndex(s => s.id === selectedStudent);
+      if (studentIndex !== -1) {
+        students[studentIndex] = {
+          ...students[studentIndex],
+          assignedTeacher: user.id,
+        };
+        
+        // Remove from available students
+        setAvailableStudents(prev => prev.filter(s => s.id !== selectedStudent));
+        
+        toast.success(`${studentToAssign.name} has been assigned to you`);
+        setDialogOpen(false);
+        setSelectedStudent("");
+      }
     }
   };
 
@@ -40,14 +87,12 @@ export default function TeacherStudents() {
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <h1 className="text-2xl md:text-3xl font-bold">Your Students</h1>
-          {user?.role === "admin" ? (
-            <Button 
-              className="bg-educational-purple hover:bg-educational-purple/90"
-              onClick={handleAddNewStudent}
-            >
-              Add New Student
-            </Button>
-          ) : null}
+          <Button 
+            className="bg-educational-purple hover:bg-educational-purple/90"
+            onClick={handleAddNewStudent}
+          >
+            {user?.role === "admin" ? "Add New Student" : "Assign New Student"}
+          </Button>
         </div>
         
         {/* Search and filter */}
@@ -113,6 +158,45 @@ export default function TeacherStudents() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Dialog for assigning students to teacher */}
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Assign Student</DialogTitle>
+            <DialogDescription>
+              Select a student to assign to your teaching schedule.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="student" className="text-right">
+                Student
+              </Label>
+              <div className="col-span-3">
+                <Select onValueChange={setSelectedStudent} value={selectedStudent}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select student" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {availableStudents
+                      .filter(s => !s.assignedTeacher)
+                      .map(student => (
+                        <SelectItem key={student.id} value={student.id}>
+                          {student.name}
+                        </SelectItem>
+                      ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancel</Button>
+            <Button onClick={handleAssignStudent}>Assign Student</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </DashboardLayout>
   );
 }
