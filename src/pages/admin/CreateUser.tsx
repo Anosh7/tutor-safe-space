@@ -10,11 +10,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { toast } from "sonner";
 import { ArrowLeft, Save, Copy } from "lucide-react";
-import { teachers, students } from "@/data/mockData";
+import { teachers, students, Student, Teacher } from "@/data/mockData";
+import { UserRole } from "@/contexts/AuthContext";
 
 export default function CreateUser() {
   const navigate = useNavigate();
-  const [userRole, setUserRole] = useState("student");
+  const [userRole, setUserRole] = useState<UserRole>("student");
   const [formData, setFormData] = useState({
     name: "",
     username: "",
@@ -76,31 +77,31 @@ export default function CreateUser() {
       name: formData.name,
       email: formData.email,
       password,
-      role: userRole,
+      profileImage: "/placeholder.svg"
     };
     
     // Add additional fields based on user role
     if (userRole === "student") {
-      const newStudent = {
+      const newStudent: Student = {
         ...newUser,
         board: formData.board,
         grade: formData.grade,
         subjects: formData.subjects.length > 0 ? formData.subjects : ["Mathematics"], // Default subject
         timezone: formData.timezone,
         parentEmail: formData.parentEmail,
-        profileImage: "/placeholder.svg"
+        role: "student" // Use the literal type
       };
       
       // Add to students array
       students.push(newStudent);
     } else if (userRole === "teacher") {
-      const newTeacher = {
+      const newTeacher: Teacher = {
         ...newUser,
         subjects: formData.subjects.length > 0 ? formData.subjects : ["Mathematics"], // Default subject
         qualifications: formData.qualifications || "Not specified",
         experience: formData.experience || "Not specified",
         timezone: formData.timezone,
-        profileImage: "/placeholder.svg"
+        role: "teacher" // Use the literal type
       };
       
       // Add to teachers array
@@ -108,7 +109,10 @@ export default function CreateUser() {
     }
     
     // Store created user for display
-    setCreatedUser(newUser);
+    setCreatedUser({
+      ...newUser,
+      role: userRole
+    });
     
     toast.success(`New ${userRole} account has been created successfully.`);
     setIsSubmitting(false);

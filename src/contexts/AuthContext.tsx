@@ -72,9 +72,16 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       );
       
       if (studentUser) {
-        // The student already has the role property now
+        // Create a user object without the password for storage
         const { password: _, ...userWithoutPassword } = studentUser;
-        foundUser = userWithoutPassword;
+        // For the User type, we don't need the password
+        foundUser = {
+          id: studentUser.id,
+          name: studentUser.name,
+          email: studentUser.email,
+          role: studentUser.role,
+          profileImage: studentUser.profileImage
+        };
       }
     }
     
@@ -85,16 +92,31 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       );
       
       if (teacherUser) {
-        // The teacher already has the role property now
+        // Create a user object without the password for storage
         const { password: _, ...userWithoutPassword } = teacherUser;
-        foundUser = userWithoutPassword;
+        // For the User type, we don't need the password
+        foundUser = {
+          id: teacherUser.id,
+          name: teacherUser.name,
+          email: teacherUser.email,
+          role: teacherUser.role,
+          profileImage: teacherUser.profileImage
+        };
       }
     }
     
     if (foundUser) {
-      setUser(foundUser as User);
-      localStorage.setItem("eduUser", JSON.stringify(foundUser));
-      toast.success(`Welcome back, ${foundUser.name}!`);
+      // Remove password from admin user before storing
+      if ('password' in foundUser) {
+        const { password: _, ...userWithoutPassword } = foundUser;
+        setUser(userWithoutPassword as User);
+        localStorage.setItem("eduUser", JSON.stringify(userWithoutPassword));
+        toast.success(`Welcome back, ${userWithoutPassword.name}!`);
+      } else {
+        setUser(foundUser as User);
+        localStorage.setItem("eduUser", JSON.stringify(foundUser));
+        toast.success(`Welcome back, ${foundUser.name}!`);
+      }
     } else {
       toast.error("Invalid email or password");
       throw new Error("Invalid credentials");
