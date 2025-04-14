@@ -186,7 +186,6 @@ export interface Student {
   parentEmail: string;
   profileImage: string;
   assignedTeacher?: string;
-  username?: string;
   password?: string;
   enrolledCourses?: string[];
 }
@@ -202,7 +201,6 @@ export const students: Student[] = [
     timezone: "Asia/Kolkata",
     parentEmail: "parent@example.com",
     profileImage: "/placeholder.svg",
-    username: "alexj1234",
     password: "password123",
     assignedTeacher: "teacher1",
     enrolledCourses: ["course1", "course2"]
@@ -219,7 +217,6 @@ export interface Teacher {
   experience: string;
   timezone: string;
   profileImage: string;
-  username?: string;
   password?: string;
   assignedCourses?: string[];
   assignedStudents?: string[];
@@ -235,7 +232,6 @@ export const teachers: Teacher[] = [
     experience: "10 years",
     timezone: "America/New_York",
     profileImage: "/placeholder.svg",
-    username: "sarahm1234",
     password: "password123",
     assignedCourses: ["course1", "course2", "course3"],
     assignedStudents: ["student1"]

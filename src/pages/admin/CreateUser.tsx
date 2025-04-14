@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -30,11 +31,10 @@ export default function CreateUser() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [createdUser, setCreatedUser] = useState<null | {
     id: string;
-    username: string;
+    email: string;
     password: string;
     role: string;
     name: string;
-    email: string;
   }>(null);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -55,14 +55,6 @@ export default function CreateUser() {
     return password;
   };
 
-  const generateUsername = (name: string) => {
-    const nameParts = name.toLowerCase().split(" ");
-    const firstName = nameParts[0];
-    const lastName = nameParts.length > 1 ? nameParts[nameParts.length - 1] : "";
-    const randomDigits = Math.floor(1000 + Math.random() * 9000);
-    return `${firstName}${lastName.charAt(0)}${randomDigits}`;
-  };
-
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
     toast.success("Copied to clipboard");
@@ -72,19 +64,17 @@ export default function CreateUser() {
     e.preventDefault();
     setIsSubmitting(true);
     
-    // Generate username and password
-    const username = formData.username || generateUsername(formData.name);
+    // Generate password if not provided
     const password = formData.password || generatePassword();
     
     // Generate a unique ID
     const newId = `${userRole}${Math.floor(Math.random() * 1000)}`;
     
-    // Create a new user object
+    // Create a new user object - now using email for login
     const newUser = {
       id: newId,
       name: formData.name,
       email: formData.email,
-      username,
       password,
       role: userRole,
     };
@@ -145,19 +135,19 @@ export default function CreateUser() {
             <CardHeader>
               <CardTitle>User Created Successfully</CardTitle>
               <CardDescription>
-                Please save these credentials. They will not be shown again.
+                Please save these login credentials. They will not be shown again.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="p-4 border rounded-md bg-green-50">
                 <div className="flex items-center justify-between mb-2">
-                  <p className="font-semibold">Username:</p>
+                  <p className="font-semibold">Email:</p>
                   <div className="flex items-center">
-                    <span className="mr-2">{createdUser.username}</span>
+                    <span className="mr-2">{createdUser.email}</span>
                     <Button 
                       size="sm" 
                       variant="ghost" 
-                      onClick={() => copyToClipboard(createdUser.username)}
+                      onClick={() => copyToClipboard(createdUser.email)}
                     >
                       <Copy className="h-4 w-4" />
                     </Button>
@@ -254,23 +244,23 @@ export default function CreateUser() {
                         onChange={handleInputChange} 
                         placeholder="Enter email address"
                       />
+                      <p className="text-xs text-gray-500">This email will be used for login</p>
                     </div>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="username">Username (optional)</Label>
+                    <div className="space-y-2 hidden">
+                      <Label htmlFor="username">Username</Label>
                       <Input 
                         id="username" 
                         name="username" 
-                        value={formData.username} 
+                        value={formData.email} 
                         onChange={handleInputChange} 
-                        placeholder="Leave blank to auto-generate"
+                        placeholder="Username will be the same as email"
                       />
-                      <p className="text-xs text-gray-500">If left blank, a username will be automatically generated</p>
                     </div>
                     
-                    <div className="space-y-2">
+                    <div className="space-y-2 col-span-2">
                       <Label htmlFor="password">Password (optional)</Label>
                       <Input 
                         id="password" 

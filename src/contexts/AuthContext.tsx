@@ -1,6 +1,7 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { toast } from "sonner";
+import { students, teachers } from "@/data/mockData";
 
 // Define user roles
 export type UserRole = "student" | "teacher" | "admin" | null;
@@ -31,22 +32,6 @@ interface AuthProviderProps {
 // Mock user data for demo purposes
 const MOCK_USERS = [
   {
-    id: "student1",
-    name: "Alex Johnson",
-    email: "student@example.com",
-    password: "password123",
-    role: "student" as UserRole,
-    profileImage: "/placeholder.svg"
-  },
-  {
-    id: "teacher1",
-    name: "Prof. Sarah Miller",
-    email: "teacher@example.com",
-    password: "password123",
-    role: "teacher" as UserRole,
-    profileImage: "/placeholder.svg"
-  },
-  {
     id: "admin1",
     name: "Admin User",
     email: "admin@example.com",
@@ -75,10 +60,24 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     // Simulate API call with delay
     await new Promise(resolve => setTimeout(resolve, 1000));
     
-    // Find user in our mock data
-    const foundUser = MOCK_USERS.find(
+    // First, check static admin users
+    let foundUser = MOCK_USERS.find(
       u => u.email === email && u.password === password
     );
+    
+    // If not found, check dynamically created students
+    if (!foundUser) {
+      foundUser = students.find(
+        s => s.email === email && s.password === password
+      );
+    }
+    
+    // If not found, check dynamically created teachers
+    if (!foundUser) {
+      foundUser = teachers.find(
+        t => t.email === email && t.password === password
+      );
+    }
     
     if (foundUser) {
       // Create a user object without the password
