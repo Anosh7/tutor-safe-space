@@ -12,7 +12,7 @@ export default function Footer() {
                 <span className="text-white font-bold text-sm">TS</span>
               </div>
               <span className="text-xl font-montserrat font-bold text-educational-purple">
-                TutorSafeSpace
+                Shrija Academy
               </span>
             </Link>
             <p className="mt-4 text-sm text-gray-600">
@@ -102,7 +102,7 @@ export default function Footer() {
         
         <div className="mt-12 border-t border-gray-200 pt-8">
           <p className="text-base text-gray-500 text-center">
-            &copy; {new Date().getFullYear()} TutorSafeSpace. All rights reserved.
+            &copy; {new Date().getFullYear()} Shrija Academy. All rights reserved.
           </p>
         </div>
       </div>
