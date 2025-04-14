@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { useAuth } from "@/contexts/AuthContext";
-import { sessions, homework, billing, teachers } from "@/data/mockData";
+import { sessions, homework, billing, teachers, courses } from "@/data/mockData";
 import SessionCard from "@/components/shared/SessionCard";
 import { Calendar, FileText, CreditCard, BookOpen, User } from "lucide-react";
 
@@ -29,6 +29,12 @@ export default function StudentDashboard() {
   const studentId = "student1"; // In a real app, this would be the current user's ID
   const assignedTeacherId = "teacher1"; // This would come from the student's data
   const assignedTeacher = teachers.find(teacher => teacher.id === assignedTeacherId);
+  
+  // Get enrolled courses
+  const studentData = { enrolledCourses: ["course1", "course2"] }; // This would be the actual student data
+  const enrolledCourses = courses.filter(course => 
+    studentData.enrolledCourses && studentData.enrolledCourses.includes(course.id)
+  );
 
   return (
     <DashboardLayout>
@@ -100,8 +106,8 @@ export default function StudentDashboard() {
               <CardTitle className="text-sm font-medium text-muted-foreground">Enrolled Courses</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">2</div>
-              <p className="text-xs text-muted-foreground">Mathematics, Physics</p>
+              <div className="text-2xl font-bold">{enrolledCourses.length}</div>
+              <p className="text-xs text-muted-foreground">{enrolledCourses.map(c => c.subjects[0]).join(", ")}</p>
             </CardContent>
           </Card>
         </div>
@@ -145,7 +151,7 @@ export default function StudentDashboard() {
                   <Button 
                     variant="link" 
                     className="mt-2 text-educational-purple"
-                    onClick={() => navigate("/courses")}
+                    onClick={() => navigate("/student-dashboard/courses")}
                   >
                     Browse courses to enroll
                   </Button>
@@ -153,6 +159,59 @@ export default function StudentDashboard() {
               </CardContent>
             </Card>
           )}
+        </div>
+        
+        {/* Enrolled Courses */}
+        <div className="space-y-4">
+          <div className="flex justify-between items-center">
+            <h2 className="text-xl font-bold flex items-center">
+              <BookOpen className="h-5 w-5 mr-2" /> Your Courses
+            </h2>
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => navigate("/student-dashboard/courses")}
+            >
+              View All
+            </Button>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {enrolledCourses.length > 0 ? (
+              enrolledCourses.map((course) => (
+                <Card key={course.id}>
+                  <CardHeader className="pb-2">
+                    <CardTitle>{course.title}</CardTitle>
+                    <CardDescription>{course.subjects.join(", ")}</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-gray-600 mb-4 line-clamp-2">{course.description}</p>
+                    <div className="flex justify-between">
+                      <div className="text-sm">
+                        <span className="font-medium">Teacher:</span> {getTeacherName(course.teacherId)}
+                      </div>
+                      <Button size="sm" variant="outline">View Course</Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))
+            ) : (
+              <Card className="md:col-span-2">
+                <CardContent className="py-8">
+                  <div className="text-center text-gray-500">
+                    <p>You are not enrolled in any courses yet</p>
+                    <Button 
+                      variant="link" 
+                      className="mt-2 text-educational-purple"
+                      onClick={() => navigate("/student-dashboard/courses")}
+                    >
+                      Browse available courses
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </div>
         </div>
         
         {/* Recent Homework */}
@@ -278,4 +337,11 @@ export default function StudentDashboard() {
       </div>
     </DashboardLayout>
   );
+  
+  // Helper function to get teacher name
+  function getTeacherName(teacherId?: string): string {
+    if (!teacherId) return "Unassigned";
+    const teacher = teachers.find(t => t.id === teacherId);
+    return teacher ? teacher.name : "Unknown Teacher";
+  }
 }

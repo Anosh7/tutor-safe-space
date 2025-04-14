@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,7 +10,14 @@ import { Checkbox } from "@/components/ui/checkbox";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { toast } from "sonner";
 import { ArrowLeft, Save, UploadCloud } from "lucide-react";
-import { courses } from "@/data/mockData";
+import { courses, students, teachers, Student, Teacher } from "@/data/mockData";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 // Subject options
 const subjectOptions = [
@@ -35,6 +42,8 @@ export default function CreateCourse() {
   const navigate = useNavigate();
   const [selectedSubjects, setSelectedSubjects] = useState<string[]>([]);
   const [selectedGrades, setSelectedGrades] = useState<string[]>([]);
+  const [selectedTeacher, setSelectedTeacher] = useState<string>("");
+  const [selectedStudents, setSelectedStudents] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   const [formData, setFormData] = useState({
@@ -65,6 +74,14 @@ export default function CreateCourse() {
     );
   };
 
+  const toggleStudent = (studentId: string) => {
+    setSelectedStudents(prev =>
+      prev.includes(studentId)
+        ? prev.filter(id => id !== studentId)
+        : [...prev, studentId]
+    );
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -80,20 +97,30 @@ export default function CreateCourse() {
       setIsSubmitting(false);
       return;
     }
+
+    if (!selectedTeacher) {
+      toast.error("Please select a teacher for this course");
+      setIsSubmitting(false);
+      return;
+    }
     
     // Generate a new course object
     const newCourse = {
-      id: `course-${courses.length + 1}`,
+      id: `course${courses.length + 1}`,
       title: formData.title,
       description: formData.description,
-      price: parseFloat(formData.price) || 0,
-      duration: formData.duration,
       subjects: selectedSubjects,
       grades: selectedGrades,
-      enrollments: 0,
-      rating: 0,
-      imageUrl: "/placeholder.svg"
+      image: "/placeholder.svg",
+      price: parseFloat(formData.price) || 0,
+      duration: formData.duration,
+      enrolledCount: 0,
+      teacherId: selectedTeacher,
+      assignedStudents: selectedStudents
     };
+    
+    // Add new course to the courses array
+    courses.push(newCourse);
     
     // Simulate API call
     setTimeout(() => {
@@ -217,6 +244,43 @@ export default function CreateCourse() {
                         onCheckedChange={() => toggleGrade(grade.id)}
                       />
                       <Label htmlFor={grade.id} className="cursor-pointer">{grade.label}</Label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="teacher">Assign Teacher</Label>
+                <Select
+                  value={selectedTeacher}
+                  onValueChange={(value) => setSelectedTeacher(value)}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select a teacher" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {teachers.map((teacher) => (
+                      <SelectItem key={teacher.id} value={teacher.id}>
+                        {teacher.name} - {teacher.subjects.join(", ")}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label className="block mb-2">Assign Students</Label>
+                <div className="max-h-60 overflow-y-auto border rounded-md p-2">
+                  {students.map((student) => (
+                    <div key={student.id} className="flex items-center space-x-2 py-2 border-b last:border-0">
+                      <Checkbox 
+                        id={`student-${student.id}`} 
+                        checked={selectedStudents.includes(student.id)}
+                        onCheckedChange={() => toggleStudent(student.id)}
+                      />
+                      <Label htmlFor={`student-${student.id}`} className="cursor-pointer">
+                        {student.name} - Grade {student.grade}
+                      </Label>
                     </div>
                   ))}
                 </div>

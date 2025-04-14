@@ -2,7 +2,21 @@
 // Mock Data for the Educational Platform
 
 // Course Data
-export const courses = [
+export interface Course {
+  id: string;
+  title: string;
+  description: string;
+  subjects: string[];
+  grades: string[];
+  image: string;
+  price: number;
+  duration: string;
+  enrolledCount: number;
+  teacherId?: string;
+  assignedStudents?: string[];
+}
+
+export const courses: Course[] = [
   {
     id: "course1",
     title: "Advanced Mathematics",
@@ -12,7 +26,9 @@ export const courses = [
     image: "/placeholder.svg",
     price: 299,
     duration: "3 months",
-    enrolledCount: 42
+    enrolledCount: 42,
+    teacherId: "teacher1",
+    assignedStudents: ["student1"]
   },
   {
     id: "course2",
@@ -23,7 +39,9 @@ export const courses = [
     image: "/placeholder.svg",
     price: 279,
     duration: "3 months",
-    enrolledCount: 38
+    enrolledCount: 38,
+    teacherId: "teacher1",
+    assignedStudents: ["student1"]
   },
   {
     id: "course3",
@@ -34,7 +52,8 @@ export const courses = [
     image: "/placeholder.svg",
     price: 349,
     duration: "4 months",
-    enrolledCount: 65
+    enrolledCount: 65,
+    teacherId: "teacher1"
   },
   {
     id: "course4",
@@ -169,6 +188,7 @@ export interface Student {
   assignedTeacher?: string;
   username?: string;
   password?: string;
+  enrolledCourses?: string[];
 }
 
 export const students: Student[] = [
@@ -184,7 +204,8 @@ export const students: Student[] = [
     profileImage: "/placeholder.svg",
     username: "alexj1234",
     password: "password123",
-    assignedTeacher: "teacher1"
+    assignedTeacher: "teacher1",
+    enrolledCourses: ["course1", "course2"]
   }
 ];
 
@@ -200,6 +221,8 @@ export interface Teacher {
   profileImage: string;
   username?: string;
   password?: string;
+  assignedCourses?: string[];
+  assignedStudents?: string[];
 }
 
 export const teachers: Teacher[] = [
@@ -213,7 +236,9 @@ export const teachers: Teacher[] = [
     timezone: "America/New_York",
     profileImage: "/placeholder.svg",
     username: "sarahm1234",
-    password: "password123"
+    password: "password123",
+    assignedCourses: ["course1", "course2", "course3"],
+    assignedStudents: ["student1"]
   }
 ];
 

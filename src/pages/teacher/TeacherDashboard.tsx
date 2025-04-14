@@ -3,17 +3,18 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { useAuth } from "@/contexts/AuthContext";
-import { sessions, homework, students } from "@/data/mockData";
+import { sessions, homework, students, courses } from "@/data/mockData";
 import SessionCard from "@/components/shared/SessionCard";
-import { Calendar, Users, FileText, CreditCard, Plus } from "lucide-react";
+import { Calendar, Users, FileText, CreditCard, Plus, BookOpen } from "lucide-react";
 
 export default function TeacherDashboard() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const teacherId = "teacher1"; // In a real app, this would come from the user context
   
   // Filter sessions for the current teacher
   const upcomingSessions = sessions
-    .filter(session => session.teacherId === "teacher1" && session.status === "scheduled" && new Date(session.date) > new Date())
+    .filter(session => session.teacherId === teacherId && session.status === "scheduled" && new Date(session.date) > new Date())
     .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
     .slice(0, 3);
     
@@ -21,6 +22,12 @@ export default function TeacherDashboard() {
     .filter(hw => hw.status === "assigned")
     .slice(0, 2);
     
+  // Get assigned students
+  const assignedStudents = students.filter(student => student.assignedTeacher === teacherId);
+  
+  // Get assigned courses
+  const assignedCourses = courses.filter(course => course.teacherId === teacherId);
+  
   // Mock earnings data
   const monthlyEarnings = 3200;
   const pendingEarnings = 800;
@@ -48,8 +55,8 @@ export default function TeacherDashboard() {
               <CardTitle className="text-sm font-medium text-muted-foreground">Assigned Students</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{students.length}</div>
-              <p className="text-xs text-muted-foreground">Across 2 subjects</p>
+              <div className="text-2xl font-bold">{assignedStudents.length}</div>
+              <p className="text-xs text-muted-foreground">Across {assignedCourses.length} courses</p>
             </CardContent>
           </Card>
           
@@ -65,13 +72,54 @@ export default function TeacherDashboard() {
           
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Pending Homework Reviews</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">Assigned Courses</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">1</div>
-              <p className="text-xs text-muted-foreground">Submitted 2 days ago</p>
+              <div className="text-2xl font-bold">{assignedCourses.length}</div>
+              <p className="text-xs text-muted-foreground">{assignedCourses.length > 0 ? 
+                assignedCourses.map(c => c.subjects[0]).join(", ").substring(0, 20) + (assignedCourses.length > 1 ? "..." : "") : 
+                "No courses assigned"}</p>
             </CardContent>
           </Card>
+        </div>
+        
+        {/* Assigned Courses */}
+        <div className="space-y-4">
+          <div className="flex justify-between items-center">
+            <h2 className="text-xl font-bold flex items-center">
+              <BookOpen className="h-5 w-5 mr-2" /> Your Courses
+            </h2>
+          </div>
+          
+          {assignedCourses.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {assignedCourses.map(course => (
+                <Card key={course.id}>
+                  <CardHeader>
+                    <CardTitle>{course.title}</CardTitle>
+                    <CardDescription>{course.subjects.join(", ")}</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-gray-600 mb-2 line-clamp-2">{course.description}</p>
+                    <div className="flex justify-between items-center mt-4">
+                      <div className="text-sm">
+                        <span className="font-medium">Students:</span> {course.assignedStudents ? course.assignedStudents.length : 0}
+                      </div>
+                      <Button size="sm" variant="outline" onClick={() => navigate("/teacher-dashboard/sessions/create")}>
+                        Schedule Session
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <Card>
+              <CardContent className="py-8 text-center text-gray-500">
+                <p>No courses have been assigned to you yet</p>
+              </CardContent>
+            </Card>
+          )}
         </div>
         
         {/* Upcoming Sessions */}
@@ -149,32 +197,38 @@ export default function TeacherDashboard() {
           
           <Card>
             <CardContent className="py-4 divide-y">
-              {students.map(student => (
-                <div key={student.id} className="py-4 first:pt-2 last:pb-2">
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <p className="font-medium">{student.name}</p>
-                      <p className="text-sm text-gray-500">Grade {student.grade} • {student.subjects.join(", ")}</p>
-                    </div>
-                    <div className="flex space-x-2">
-                      <Button 
-                        size="sm" 
-                        variant="outline"
-                        onClick={() => navigate(`/teacher-dashboard/students/${student.id}`)}
-                      >
-                        View Details
-                      </Button>
-                      <Button 
-                        size="sm"
-                        className="bg-educational-purple hover:bg-educational-purple/90"
-                        onClick={() => navigate("/teacher-dashboard/sessions/create")}
-                      >
-                        Schedule Session
-                      </Button>
+              {assignedStudents.length > 0 ? (
+                assignedStudents.map(student => (
+                  <div key={student.id} className="py-4 first:pt-2 last:pb-2">
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <p className="font-medium">{student.name}</p>
+                        <p className="text-sm text-gray-500">Grade {student.grade} • {student.subjects.join(", ")}</p>
+                      </div>
+                      <div className="flex space-x-2">
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          onClick={() => navigate(`/teacher-dashboard/students/${student.id}`)}
+                        >
+                          View Details
+                        </Button>
+                        <Button 
+                          size="sm"
+                          className="bg-educational-purple hover:bg-educational-purple/90"
+                          onClick={() => navigate("/teacher-dashboard/sessions/create")}
+                        >
+                          Schedule Session
+                        </Button>
+                      </div>
                     </div>
                   </div>
+                ))
+              ) : (
+                <div className="py-8 text-center text-gray-500">
+                  <p>No students assigned to you yet</p>
                 </div>
-              ))}
+              )}
             </CardContent>
           </Card>
         </div>

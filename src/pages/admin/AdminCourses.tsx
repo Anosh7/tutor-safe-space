@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import DashboardLayout from "@/components/layout/DashboardLayout";
-import { courses as initialCourses } from "@/data/mockData";
+import { courses as initialCourses, teachers } from "@/data/mockData";
 import { PlusCircle, Search, Edit, Eye, Trash } from "lucide-react";
 import { toast } from "sonner";
 import { 
@@ -38,6 +38,12 @@ export default function AdminCourses() {
     course.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
     course.subjects.some(subject => subject.toLowerCase().includes(searchQuery.toLowerCase()))
   );
+
+  const getTeacherName = (teacherId?: string) => {
+    if (!teacherId) return "Unassigned";
+    const teacher = teachers.find(t => t.id === teacherId);
+    return teacher ? teacher.name : "Unknown";
+  };
 
   const handleView = (courseId: string) => {
     navigate(`/admin-dashboard/courses/${courseId}`);
@@ -109,6 +115,7 @@ export default function AdminCourses() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Title</TableHead>
+                    <TableHead>Teacher</TableHead>
                     <TableHead>Subjects</TableHead>
                     <TableHead>Price</TableHead>
                     <TableHead>Enrolled</TableHead>
@@ -119,9 +126,12 @@ export default function AdminCourses() {
                   {filteredCourses.map((course) => (
                     <TableRow key={course.id}>
                       <TableCell className="font-medium">{course.title}</TableCell>
+                      <TableCell>{getTeacherName(course.teacherId)}</TableCell>
                       <TableCell>{course.subjects.join(", ")}</TableCell>
                       <TableCell>${course.price}</TableCell>
-                      <TableCell>{course.enrolledCount}</TableCell>
+                      <TableCell>
+                        {course.assignedStudents ? course.assignedStudents.length : 0}
+                      </TableCell>
                       <TableCell className="text-right">
                         <Button 
                           variant="ghost" 
