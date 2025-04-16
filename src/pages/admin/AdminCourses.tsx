@@ -41,6 +41,7 @@ interface Course {
   image_url?: string;
   status?: string;
   created_at?: string;
+  enrollmentCount?: number;
 }
 
 // Teacher profile type
@@ -85,7 +86,20 @@ export default function AdminCourses() {
           subjects: course.subject?.split(',') || []
         })) || [];
         
-        setCourses(processedCourses);
+        // Fetch enrollment counts for each course
+        const coursesWithEnrollments = await Promise.all(processedCourses.map(async (course) => {
+          const { count, error } = await supabase
+            .from('enrollments')
+            .select('*', { count: 'exact', head: true })
+            .eq('course_id', course.id);
+          
+          return {
+            ...course,
+            enrollmentCount: error ? 0 : count || 0
+          };
+        }));
+        
+        setCourses(coursesWithEnrollments);
         setTeachers(teachersData || []);
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -147,22 +161,6 @@ export default function AdminCourses() {
 
   const cancelDelete = () => {
     setCourseToDelete(null);
-  };
-
-  // Get enrollment count for a course
-  const getEnrollmentCount = async (courseId: string) => {
-    try {
-      const { count, error } = await supabase
-        .from('enrollments')
-        .select('*', { count: 'exact', head: true })
-        .eq('course_id', courseId);
-      
-      if (error) throw error;
-      return count || 0;
-    } catch (error) {
-      console.error('Error getting enrollment count:', error);
-      return 0;
-    }
   };
 
   return (
@@ -228,8 +226,7 @@ export default function AdminCourses() {
                       <TableCell>{course.subjects?.join(", ") || course.subject}</TableCell>
                       <TableCell>${course.price}</TableCell>
                       <TableCell>
-                        {/* We'll implement this later with real data */}
-                        -
+                        {course.enrollmentCount}
                       </TableCell>
                       <TableCell className="text-right">
                         <Button 
