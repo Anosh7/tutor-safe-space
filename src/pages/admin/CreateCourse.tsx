@@ -10,7 +10,6 @@ import { Checkbox } from "@/components/ui/checkbox";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { toast } from "sonner";
 import { ArrowLeft, Save, UploadCloud } from "lucide-react";
-import { courses, students, teachers, Student, Teacher } from "@/data/mockData";
 import {
   Select,
   SelectContent,
@@ -18,6 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { supabase } from "@/integrations/supabase/client";
 
 // Subject options
 const subjectOptions = [
@@ -38,6 +38,15 @@ const gradeOptions = [
   { id: "12", label: "Grade 12" },
 ];
 
+// Interface for Profile data
+interface Profile {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  profile_image?: string;
+}
+
 export default function CreateCourse() {
   const navigate = useNavigate();
   const [selectedSubjects, setSelectedSubjects] = useState<string[]>([]);
@@ -45,6 +54,9 @@ export default function CreateCourse() {
   const [selectedTeacher, setSelectedTeacher] = useState<string>("");
   const [selectedStudents, setSelectedStudents] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [teachers, setTeachers] = useState<Profile[]>([]);
+  const [students, setStudents] = useState<Profile[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   
   const [formData, setFormData] = useState({
     title: "",
@@ -52,6 +64,39 @@ export default function CreateCourse() {
     price: "",
     duration: ""
   });
+
+  // Fetch teachers and students from database
+  useEffect(() => {
+    const fetchProfiles = async () => {
+      setIsLoading(true);
+      try {
+        // Fetch teacher profiles
+        const { data: teacherData, error: teacherError } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('role', 'teacher');
+        
+        if (teacherError) throw teacherError;
+        setTeachers(teacherData || []);
+        
+        // Fetch student profiles
+        const { data: studentData, error: studentError } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('role', 'student');
+        
+        if (studentError) throw studentError;
+        setStudents(studentData || []);
+      } catch (error) {
+        console.error('Error fetching profiles:', error);
+        toast.error("Failed to load teacher and student data");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchProfiles();
+  }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -82,7 +127,7 @@ export default function CreateCourse() {
     );
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     
@@ -104,30 +149,39 @@ export default function CreateCourse() {
       return;
     }
     
-    // Generate a new course object
-    const newCourse = {
-      id: `course${courses.length + 1}`,
-      title: formData.title,
-      description: formData.description,
-      subjects: selectedSubjects,
-      grades: selectedGrades,
-      image: "/placeholder.svg",
-      price: parseFloat(formData.price) || 0,
-      duration: formData.duration,
-      enrolledCount: 0,
-      teacherId: selectedTeacher,
-      assignedStudents: selectedStudents
-    };
-    
-    // Add new course to the courses array
-    courses.push(newCourse);
-    
-    // Simulate API call
-    setTimeout(() => {
+    try {
+      // Insert new course into database
+      const { data, error } = await supabase.from('courses').insert({
+        title: formData.title,
+        description: formData.description,
+        subject: selectedSubjects.join(','),
+        grade: selectedGrades.join(','),
+        price: parseFloat(formData.price) || 0,
+        teacher_id: selectedTeacher,
+        image_url: '/placeholder.svg',
+      }).select().single();
+      
+      if (error) throw error;
+      
+      // Create enrollments for selected students
+      if (selectedStudents.length > 0) {
+        const enrollments = selectedStudents.map(studentId => ({
+          course_id: data.id,
+          student_id: studentId,
+        }));
+        
+        const { error: enrollmentError } = await supabase.from('enrollments').insert(enrollments);
+        if (enrollmentError) throw enrollmentError;
+      }
+      
       toast.success("New course has been created successfully");
-      setIsSubmitting(false);
       navigate("/admin-dashboard/courses");
-    }, 1000);
+    } catch (error) {
+      console.error('Error creating course:', error);
+      toast.error("Failed to create course");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -251,39 +305,61 @@ export default function CreateCourse() {
 
               <div className="space-y-2">
                 <Label htmlFor="teacher">Assign Teacher</Label>
-                <Select
-                  value={selectedTeacher}
-                  onValueChange={(value) => setSelectedTeacher(value)}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select a teacher" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {teachers.map((teacher) => (
-                      <SelectItem key={teacher.id} value={teacher.id}>
-                        {teacher.name} - {teacher.subjects.join(", ")}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                {isLoading ? (
+                  <div className="flex items-center space-x-2 py-2">
+                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"></div>
+                    <p className="text-sm text-muted-foreground">Loading teachers...</p>
+                  </div>
+                ) : (
+                  <Select
+                    value={selectedTeacher}
+                    onValueChange={(value) => setSelectedTeacher(value)}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select a teacher" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {teachers.length === 0 ? (
+                        <SelectItem value="no-teachers" disabled>No teachers found</SelectItem>
+                      ) : (
+                        teachers.map((teacher) => (
+                          <SelectItem key={teacher.id} value={teacher.id}>
+                            {teacher.name} ({teacher.email})
+                          </SelectItem>
+                        ))
+                      )}
+                    </SelectContent>
+                  </Select>
+                )}
               </div>
 
               <div className="space-y-2">
                 <Label className="block mb-2">Assign Students</Label>
-                <div className="max-h-60 overflow-y-auto border rounded-md p-2">
-                  {students.map((student) => (
-                    <div key={student.id} className="flex items-center space-x-2 py-2 border-b last:border-0">
-                      <Checkbox 
-                        id={`student-${student.id}`} 
-                        checked={selectedStudents.includes(student.id)}
-                        onCheckedChange={() => toggleStudent(student.id)}
-                      />
-                      <Label htmlFor={`student-${student.id}`} className="cursor-pointer">
-                        {student.name} - Grade {student.grade}
-                      </Label>
-                    </div>
-                  ))}
-                </div>
+                {isLoading ? (
+                  <div className="flex items-center space-x-2 py-2">
+                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"></div>
+                    <p className="text-sm text-muted-foreground">Loading students...</p>
+                  </div>
+                ) : (
+                  <div className="max-h-60 overflow-y-auto border rounded-md p-2">
+                    {students.length === 0 ? (
+                      <p className="text-sm text-muted-foreground py-2">No students found</p>
+                    ) : (
+                      students.map((student) => (
+                        <div key={student.id} className="flex items-center space-x-2 py-2 border-b last:border-0">
+                          <Checkbox 
+                            id={`student-${student.id}`} 
+                            checked={selectedStudents.includes(student.id)}
+                            onCheckedChange={() => toggleStudent(student.id)}
+                          />
+                          <Label htmlFor={`student-${student.id}`} className="cursor-pointer">
+                            {student.name} ({student.email})
+                          </Label>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                )}
               </div>
 
               <div className="space-y-2">

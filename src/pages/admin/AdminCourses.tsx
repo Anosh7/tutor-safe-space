@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,7 +13,6 @@ import {
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import DashboardLayout from "@/components/layout/DashboardLayout";
-import { courses as initialCourses, teachers } from "@/data/mockData";
 import { PlusCircle, Search, Edit, Eye, Trash } from "lucide-react";
 import { toast } from "sonner";
 import { 
@@ -26,17 +25,83 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { supabase } from "@/integrations/supabase/client";
+
+// Course type definition
+interface Course {
+  id: string;
+  title: string;
+  description: string;
+  subject: string;
+  subjects?: string[];
+  grade?: string;
+  price: number;
+  teacherId?: string;
+  teacher_id?: string;
+  image_url?: string;
+  status?: string;
+  created_at?: string;
+}
+
+// Teacher profile type
+interface Teacher {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+}
 
 export default function AdminCourses() {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
-  const [courses, setCourses] = useState(initialCourses);
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [teachers, setTeachers] = useState<Teacher[]>([]);
   const [courseToDelete, setCourseToDelete] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   
+  // Fetch courses and teachers from database
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsLoading(true);
+      try {
+        // Fetch courses
+        const { data: coursesData, error: coursesError } = await supabase
+          .from('courses')
+          .select('*');
+        
+        if (coursesError) throw coursesError;
+        
+        // Fetch teacher profiles
+        const { data: teachersData, error: teachersError } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('role', 'teacher');
+        
+        if (teachersError) throw teachersError;
+        
+        // Process courses data to match expected format
+        const processedCourses = coursesData?.map(course => ({
+          ...course,
+          subjects: course.subject?.split(',') || []
+        })) || [];
+        
+        setCourses(processedCourses);
+        setTeachers(teachersData || []);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        toast.error("Failed to load courses");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchData();
+  }, []);
+
   const filteredCourses = courses.filter(course => 
-    course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    course.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    course.subjects.some(subject => subject.toLowerCase().includes(searchQuery.toLowerCase()))
+    course.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    course.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    course.subjects?.some(subject => subject.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
   const getTeacherName = (teacherId?: string) => {
@@ -57,19 +122,47 @@ export default function AdminCourses() {
     setCourseToDelete(courseId);
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (!courseToDelete) return;
     
-    // Filter out the course to be deleted
-    const updatedCourses = courses.filter(course => course.id !== courseToDelete);
-    setCourses(updatedCourses);
-    
-    toast.success("Course deleted successfully");
-    setCourseToDelete(null);
+    try {
+      // Delete from database
+      const { error } = await supabase
+        .from('courses')
+        .delete()
+        .eq('id', courseToDelete);
+      
+      if (error) throw error;
+      
+      // Remove from local state
+      setCourses(courses.filter(course => course.id !== courseToDelete));
+      toast.success("Course deleted successfully");
+    } catch (error) {
+      console.error('Error deleting course:', error);
+      toast.error("Failed to delete course");
+    } finally {
+      setCourseToDelete(null);
+    }
   };
 
   const cancelDelete = () => {
     setCourseToDelete(null);
+  };
+
+  // Get enrollment count for a course
+  const getEnrollmentCount = async (courseId: string) => {
+    try {
+      const { count, error } = await supabase
+        .from('enrollments')
+        .select('*', { count: 'exact', head: true })
+        .eq('course_id', courseId);
+      
+      if (error) throw error;
+      return count || 0;
+    } catch (error) {
+      console.error('Error getting enrollment count:', error);
+      return 0;
+    }
   };
 
   return (
@@ -102,7 +195,12 @@ export default function AdminCourses() {
             </div>
           </CardHeader>
           <CardContent>
-            {courses.length === 0 ? (
+            {isLoading ? (
+              <div className="flex justify-center items-center py-8">
+                <div className="h-6 w-6 animate-spin rounded-full border-2 border-educational-purple border-t-transparent"></div>
+                <p className="ml-2 text-sm text-muted-foreground">Loading courses...</p>
+              </div>
+            ) : courses.length === 0 ? (
               <div className="text-center py-8 text-gray-500">
                 No courses found. Click "Create Course" to add a new course.
               </div>
@@ -126,11 +224,12 @@ export default function AdminCourses() {
                   {filteredCourses.map((course) => (
                     <TableRow key={course.id}>
                       <TableCell className="font-medium">{course.title}</TableCell>
-                      <TableCell>{getTeacherName(course.teacherId)}</TableCell>
-                      <TableCell>{course.subjects.join(", ")}</TableCell>
+                      <TableCell>{getTeacherName(course.teacher_id || course.teacherId)}</TableCell>
+                      <TableCell>{course.subjects?.join(", ") || course.subject}</TableCell>
                       <TableCell>${course.price}</TableCell>
                       <TableCell>
-                        {course.assignedStudents ? course.assignedStudents.length : 0}
+                        {/* We'll implement this later with real data */}
+                        -
                       </TableCell>
                       <TableCell className="text-right">
                         <Button 
