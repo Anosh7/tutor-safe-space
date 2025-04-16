@@ -149,6 +149,16 @@ export default function CreateCourse() {
     }
     
     try {
+      console.log("Creating course with data:", {
+        title: formData.title,
+        description: formData.description,
+        subject: selectedSubjects.join(','),
+        grade: selectedGrades.join(','),
+        price: parseFloat(formData.price) || 0,
+        teacher_id: selectedTeacher,
+        status: 'active'
+      });
+
       // Insert new course into database
       const { data: courseData, error: courseError } = await supabase
         .from('courses')
@@ -162,31 +172,44 @@ export default function CreateCourse() {
           image_url: '/placeholder.svg',
           status: 'active'
         })
-        .select()
-        .single();
+        .select();
       
-      if (courseError) throw courseError;
+      if (courseError) {
+        console.error("Course error details:", courseError);
+        throw courseError;
+      }
+      
+      if (!courseData || courseData.length === 0) {
+        throw new Error("No course data returned after insertion");
+      }
+      
+      console.log("Course created successfully:", courseData);
       
       // Create enrollments for selected students
-      if (selectedStudents.length > 0) {
+      if (selectedStudents.length > 0 && courseData[0].id) {
         const enrollments = selectedStudents.map(studentId => ({
-          course_id: courseData.id,
+          course_id: courseData[0].id,
           student_id: studentId,
           status: 'active'
         }));
+        
+        console.log("Creating enrollments:", enrollments);
         
         const { error: enrollmentError } = await supabase
           .from('enrollments')
           .insert(enrollments);
         
-        if (enrollmentError) throw enrollmentError;
+        if (enrollmentError) {
+          console.error("Enrollment error details:", enrollmentError);
+          throw enrollmentError;
+        }
       }
       
       toast.success("New course has been created successfully");
       navigate("/admin-dashboard/courses");
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error creating course:', error);
-      toast.error("Failed to create course");
+      toast.error(`Failed to create course: ${error.message || "Unknown error"}`);
     } finally {
       setIsSubmitting(false);
     }
