@@ -65,7 +65,6 @@ export default function CreateCourse() {
     duration: ""
   });
 
-  // Fetch teachers and students from database
   useEffect(() => {
     const fetchProfiles = async () => {
       setIsLoading(true);
@@ -151,26 +150,35 @@ export default function CreateCourse() {
     
     try {
       // Insert new course into database
-      const { data, error } = await supabase.from('courses').insert({
-        title: formData.title,
-        description: formData.description,
-        subject: selectedSubjects.join(','),
-        grade: selectedGrades.join(','),
-        price: parseFloat(formData.price) || 0,
-        teacher_id: selectedTeacher,
-        image_url: '/placeholder.svg',
-      }).select().single();
+      const { data: courseData, error: courseError } = await supabase
+        .from('courses')
+        .insert({
+          title: formData.title,
+          description: formData.description,
+          subject: selectedSubjects.join(','),
+          grade: selectedGrades.join(','),
+          price: parseFloat(formData.price) || 0,
+          teacher_id: selectedTeacher,
+          image_url: '/placeholder.svg',
+          status: 'active'
+        })
+        .select()
+        .single();
       
-      if (error) throw error;
+      if (courseError) throw courseError;
       
       // Create enrollments for selected students
       if (selectedStudents.length > 0) {
         const enrollments = selectedStudents.map(studentId => ({
-          course_id: data.id,
+          course_id: courseData.id,
           student_id: studentId,
+          status: 'active'
         }));
         
-        const { error: enrollmentError } = await supabase.from('enrollments').insert(enrollments);
+        const { error: enrollmentError } = await supabase
+          .from('enrollments')
+          .insert(enrollments);
+        
         if (enrollmentError) throw enrollmentError;
       }
       
